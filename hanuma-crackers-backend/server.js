@@ -90,15 +90,15 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // CORS with production configuration
+const corsOriginsEnv = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map(o => o.trim()) : [];
+const devOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [...corsOriginsEnv, 'https://hanuma-crackers.netlify.app']
+  : [...devOrigins, ...corsOriginsEnv];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = process.env.NODE_ENV === 'production' 
-      ? ['https://hanuma-crackers.vercel.app', 'https://hanuma-crackers.netlify.app', 'https://hanuma-crackers.com']
-      : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'];
-    
-    // Allow requests with no origin (mobile apps, etc.)
     if (!origin) return callback(null, true);
-    
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
