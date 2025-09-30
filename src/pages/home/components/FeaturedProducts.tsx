@@ -107,7 +107,7 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
     const controller = new AbortController();
     (async () => {
       try {
-          const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Use environment variable for API URL
+          const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
   const res = await fetch(`${API_URL}/api/products?limit=40`); // No abort signal for infinite rate limit
         if (!res.ok) throw new Error('Failed to load products');
         const data = await res.json();
@@ -152,7 +152,7 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
 
   const fetchWishlistItems = async () => {
     try {
-          const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Use environment variable for API URL
+          const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
   const response = await fetch(`${API_URL}/api/wishlist`, {
         credentials: 'include',
         headers: {
@@ -180,7 +180,7 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
     try {
       if (isInWishlist) {
         // Remove from wishlist
-            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Use environment variable for API URL
+            const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
   const response = await fetch(`${API_URL}/api/wishlist/${productId}`, {
           method: 'DELETE',
           credentials: 'include',
@@ -203,7 +203,7 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
         }
       } else {
         // Add to wishlist (use /api/wishlist/:productId as per backend)
-            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Use environment variable for API URL
+            const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
   const response = await fetch(`${API_URL}/api/wishlist/${productId}`, {
           method: 'POST',
           credentials: 'include',

@@ -48,7 +48,8 @@ export default function ResetPassword() {
     setStatus('idle');
 
     try {
-      const response = await fetch(`http://localhost:5000/api/auth/reset-password/${token}`, {
+  const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+  const response = await fetch(`${API_URL}/api/auth/reset-password/${token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

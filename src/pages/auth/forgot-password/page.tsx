@@ -13,7 +13,8 @@ export default function ForgotPassword() {
     setStatus('idle');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+  const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+  const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

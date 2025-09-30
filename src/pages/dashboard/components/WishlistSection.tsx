@@ -38,7 +38,8 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
     try {
       setLoading(true);
       console.log('Fetching wishlist...');
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+  const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+  const response = await fetch(`${API_URL}/api/wishlist`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
@@ -69,7 +70,8 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
 
   const removeFromWishlist = async (itemId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${itemId}`, {
+  const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+  const response = await fetch(`${API_URL}/api/wishlist/${itemId}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
@@ -145,7 +147,8 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
     if (!confirm('Are you sure you want to clear your entire wishlist?')) return;
     
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+  const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+  const response = await fetch(`${API_URL}/api/wishlist`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
