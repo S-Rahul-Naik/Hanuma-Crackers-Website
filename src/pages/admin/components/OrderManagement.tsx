@@ -1,4 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
+
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
 import jsPDF from 'jspdf';
 
 interface Order {
@@ -41,7 +43,7 @@ export default function OrderManagement() {
         ...(statusFilter !== 'all' && { status: statusFilter })
       });
 
-      const response = await fetch(`/api/admin/orders?${queryParams}`, {
+  const response = await fetch(`${API_URL}/api/admin/orders?${queryParams}`, {
         credentials: 'include'
       });
       

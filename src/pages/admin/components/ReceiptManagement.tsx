@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
 import { useNotifications } from '../../../hooks/useNotifications';
 import NotificationSettings from './NotificationSettings';
 
@@ -57,7 +59,7 @@ export default function ReceiptManagement() {
 
   const fetchOrdersWithReceipts = async () => {
     try {
-      const response = await fetch('/api/admin/orders-with-receipts', {
+  const response = await fetch(`${API_URL}/api/admin/orders-with-receipts`, {
         credentials: 'include'
       });
       const data = await response.json();

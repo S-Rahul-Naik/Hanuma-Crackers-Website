@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
 import jsPDF from 'jspdf';
 
 interface OrderItem {
@@ -10,9 +11,9 @@ interface OrderItem {
   image?: string;
 }
 
-interface Order {
+      console.log('Fetching orders from:', `${API_URL}/api/orders/myorders`);
   _id: string;
-  orderNumber: string;
+      const response = await fetch(`${API_URL}/api/orders/myorders`, {
   createdAt: string;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'failed';
@@ -39,12 +40,12 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
-  const [showTrackingModal, setShowTrackingModal] = useState(false);
+        url: `${API_URL}/api/orders/${orderId}/${action}`,
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelOrder, setCancelOrder] = useState<Order | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelComment, setCancelComment] = useState('');
-
+      const response = await fetch(`${API_URL}/api/orders/${orderId}/${action}`, {
   useEffect(() => {
     fetchMyOrders();
   }, []);

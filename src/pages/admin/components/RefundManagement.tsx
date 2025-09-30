@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
 import { useNotifications } from '../../../hooks/useNotifications';
 
 interface RefundRequest {
@@ -41,7 +43,7 @@ export default function RefundManagement() {
 
   const fetchRefundRequests = async () => {
     try {
-      const response = await fetch('/api/orders/refund-requests', {
+  const response = await fetch(`${API_URL}/api/orders/refund-requests`, {
         credentials: 'include'
       });
 

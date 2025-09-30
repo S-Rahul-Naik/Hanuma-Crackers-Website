@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+
 interface Product {
   _id: string;
   name: string;
@@ -68,7 +70,7 @@ export default function CouponManagement() {
 
   const fetchCoupons = async () => {
     try {
-      const response = await fetch('/api/admin/coupons', {
+  const response = await fetch(`${API_URL}/api/admin/coupons`, {
         credentials: 'include'
       });
       const data = await response.json();

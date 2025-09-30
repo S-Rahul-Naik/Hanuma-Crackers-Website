@@ -1,5 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+
 interface Customer {
   _id: string;
   name: string;
@@ -44,7 +46,7 @@ export default function CustomerManagement() {
         ...(statusFilter !== 'all' && { status: statusFilter })
       });
 
-      const response = await fetch(`/api/admin/customers?${queryParams}`, {
+  const response = await fetch(`${API_URL}/api/admin/customers?${queryParams}`, {
         credentials: 'include'
       });
       

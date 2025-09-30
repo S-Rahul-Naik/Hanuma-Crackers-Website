@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+
 interface Product {
   id: string; // MongoDB _id stored as string
   name: string;
@@ -37,7 +39,7 @@ export default function ProductManagement() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/products?limit=100', { credentials: 'include', signal: controller.signal })
+  fetch(`${API_URL}/api/products?limit=100`, { credentials: 'include', signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.products)) {
