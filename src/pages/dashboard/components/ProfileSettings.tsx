@@ -68,7 +68,8 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
       payload.newsletter = formData.newsletter;
       payload.notifications = formData.notifications;
 
-      const res = await fetch('/api/auth/updatedetails', {
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const res = await fetch(`${API_URL}/api/auth/updatedetails`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
