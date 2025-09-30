@@ -26,7 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchMe = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/me', { credentials: 'include' });
+  const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+  const res = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         if (data.success !== false && data.user) {
@@ -49,7 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => { fetchMe(); }, [fetchMe]);
 
   const logout = useCallback(async () => {
-    try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (_) {}
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      await fetch(`${API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+    } catch (_) {}
     setUser(null);
   }, []);
 
