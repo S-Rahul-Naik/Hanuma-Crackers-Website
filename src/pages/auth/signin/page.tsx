@@ -28,7 +28,8 @@ export default function SignIn() {
         })
       });
       const data = await res.json();
-      if (data.success && data.user) {
+      if (data.success && data.user && data.token) {
+        localStorage.setItem('auth_token', data.token);
         await refresh();
         navigate(data.user.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
       } else {

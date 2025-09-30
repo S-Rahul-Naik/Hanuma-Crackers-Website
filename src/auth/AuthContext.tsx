@@ -26,8 +26,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchMe = useCallback(async () => {
     setLoading(true);
     try {
-  const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
-  const res = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' });
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem('auth_token');
+      const res = await fetch(`${API_URL}/api/auth/me`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.success !== false && data.user) {
