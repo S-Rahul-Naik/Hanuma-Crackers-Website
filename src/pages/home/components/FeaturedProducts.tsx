@@ -107,7 +107,8 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
     const controller = new AbortController();
     (async () => {
       try {
-        const res = await fetch('/api/products?limit=40', { signal: controller.signal });
+          const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Use environment variable for API URL
+  const res = await fetch(`${API_URL}/api/products?limit=40`); // No abort signal for infinite rate limit
         if (!res.ok) throw new Error('Failed to load products');
         const data = await res.json();
         if (data.success && Array.isArray(data.products)) {
@@ -151,7 +152,8 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
 
   const fetchWishlistItems = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+          const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Use environment variable for API URL
+  const response = await fetch(`${API_URL}/api/wishlist`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
@@ -160,8 +162,8 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
 
       if (response.ok) {
         const data = await response.json();
-        const wishlistIds = new Set(data.data?.map((item: any) => item._id) || []);
-        setWishlistItems(wishlistIds);
+  const wishlistIds = new Set<string>((data.data?.map((item: any) => String(item._id)) || []) as string[]);
+  setWishlistItems(wishlistIds);
       }
     } catch (err) {
       console.error('Error fetching wishlist:', err);
@@ -178,7 +180,8 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
     try {
       if (isInWishlist) {
         // Remove from wishlist
-        const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Use environment variable for API URL
+  const response = await fetch(`${API_URL}/api/wishlist/${productId}`, {
           method: 'DELETE',
           credentials: 'include',
           headers: {
@@ -200,7 +203,8 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
         }
       } else {
         // Add to wishlist (use /api/wishlist/:productId as per backend)
-        const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Use environment variable for API URL
+  const response = await fetch(`${API_URL}/api/wishlist/${productId}`, {
           method: 'POST',
           credentials: 'include',
           headers: {
@@ -239,7 +243,7 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
     ? products
     : products.filter(product => product.category === selectedCategory);
 
-  const addToCart = (productId: string, productName: string) => {
+    const addToCart = (productId: string, productName: string) => { // Function to add product to cart
     onAddToCart(productId, productName); // parent ignores productName currently
     
     // Show notification
@@ -389,9 +393,9 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
                 </h3>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
-                  <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                  <span className="text-sm text-gray-500 line-through">₹{(product.price * 1.15).toFixed(2)}</span>
                   <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                    {product.discount}% OFF
+                    {product.discount === 0 ? '15% OFF' : `${product.discount}% OFF`}
                   </span>
                 </div>
                 <button 
