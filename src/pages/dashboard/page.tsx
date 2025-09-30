@@ -50,15 +50,26 @@ export default function UserDashboard() {
 
   const [activeTab, setActiveTab] = useState('overview');
   // Cart logic copied from home page
-  const [cart, setCart] = useState<{[key: string]: number}>(() => {
-    try {
-      const savedCart = localStorage.getItem('hanuma-crackers-cart');
-      return savedCart ? JSON.parse(savedCart) : {};
-    } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
-      return {};
-    }
-  });
+  const [cart, setCart] = useState<{[key: string]: number}>({});
+
+  // Always sync cart from localStorage on mount and when cart sidebar is opened
+  useEffect(() => {
+    const syncCart = () => {
+      try {
+        const savedCart = localStorage.getItem('hanuma-crackers-cart');
+        setCart(savedCart ? JSON.parse(savedCart) : {});
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
+        setCart({});
+      }
+    };
+    syncCart();
+    // Listen for cart sidebar open events
+    window.addEventListener('dashboardCartOpen', syncCart);
+    return () => {
+      window.removeEventListener('dashboardCartOpen', syncCart);
+    };
+  }, []);
   const [loadedProducts, setLoadedProducts] = useState<any[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
