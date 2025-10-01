@@ -66,8 +66,8 @@ app.use(hpp({
 
 // Rate limiting for production security - more lenient for auth
 const limiter = rateLimit({
-  windowMs: process.env.RATE_LIMIT_WINDOW || 150* 60 * 1000, // 15 minutes
-  max: process.env.RATE_LIMIT_MAX || 3000// Increased from 100 to 300 requests per windowMs
+  windowMs: process.env.RATE_LIMIT_WINDOW || 15 * 60 * 1000, // 15 minutes
+  max: process.env.RATE_LIMIT_MAX || 3000, // Increased from 100 to 300 requests per windowMs
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.'
