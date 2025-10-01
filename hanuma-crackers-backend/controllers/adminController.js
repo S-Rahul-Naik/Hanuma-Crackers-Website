@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 
 // @desc    Get customer analytics and statistics
 // @route   GET /api/admin/customers
@@ -343,6 +344,34 @@ exports.updateOrderStatus = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating order status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get out of stock products
+// @route   GET /api/admin/out-of-stock
+// @access  Private/Admin
+exports.getOutOfStockProducts = async (req, res) => {
+  try {
+    // Get products with stock <= 0
+    const outOfStockProducts = await Product.find({ 
+      stock: { $lte: 0 } 
+    }).select('name category price stock images createdAt').sort({ createdAt: -1 });
+
+    // Get total count of out of stock products
+    const outOfStockCount = outOfStockProducts.length;
+
+    res.status(200).json({
+      success: true,
+      count: outOfStockCount,
+      products: outOfStockProducts
+    });
+  } catch (error) {
+    console.error('Error fetching out of stock products:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',

@@ -15,7 +15,8 @@ const {
   getCustomerDetails,
   updateCustomerStatus,
   getOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  getOutOfStockProducts
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -283,5 +284,10 @@ router.get('/orders', protect, authorize('admin'), getOrders);
 // @route   PUT /api/admin/orders/:orderId/status
 // @access  Private/Admin
 router.put('/orders/:orderId/status', protect, authorize('admin'), updateOrderStatus);
+
+// @desc    Get out of stock products
+// @route   GET /api/admin/out-of-stock
+// @access  Private/Admin
+router.get('/out-of-stock', protect, authorize('admin'), getOutOfStockProducts);
 
 module.exports = router;

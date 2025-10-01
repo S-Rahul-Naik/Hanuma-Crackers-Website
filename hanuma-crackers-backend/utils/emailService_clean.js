@@ -31,7 +31,7 @@ class EmailService {
       delete config.service;
     }
 
-    return nodemailer.createTransport(config);
+    return nodemailer.createTransporter(config);
   }
 
   async verifyConnection() {
