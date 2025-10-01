@@ -221,6 +221,16 @@ export default function CheckoutPage() {
           totalPrice
         })
       });
+
+      const orderData = await res.json();
+      
+      if (res.ok && orderData.success) {
+        // Set the order ID and order number for receipt upload
+        setOrderId(orderData.order._id);
+        setOrderNumber(orderData.order.orderNumber);
+      } else {
+        throw new Error(orderData.message || 'Failed to create order');
+      }
       // Mark coupon as used if applied
       if (appliedCoupon) {
         try {
