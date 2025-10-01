@@ -32,7 +32,8 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
     const controller = new AbortController();
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/dashboard/overview', { signal: controller.signal, credentials: 'include' });
+        const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/dashboard/overview`, { signal: controller.signal, credentials: 'include' });
         if (!res.ok) throw new Error('Failed to load dashboard');
         const json = await res.json();
         if (isMounted && json && json.success !== false) {
