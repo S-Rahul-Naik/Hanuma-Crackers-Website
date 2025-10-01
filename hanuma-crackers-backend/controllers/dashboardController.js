@@ -37,63 +37,72 @@ exports.getDashboardOverview = async (req, res, next) => {
       return res.json({ success: true, data: cached, cached: true });
     }
 
-    // Get user basic aggregates
-    const user = await User.findById(userId).select('wishlist totalSpent totalOrders');
-
-    // Orders aggregate - only count PAID orders for total spent
-    // Total orders count = all orders except cancelled/refunded
     const userObjectId = new mongoose.Types.ObjectId(userId);
     
-    // Count all orders (except cancelled/refunded)
-    const orderCount = await Order.countDocuments({ 
-      user: userObjectId, 
-      status: { $nin: ['cancelled', 'refunded'] } 
-    });
-
-    // Calculate total spent - only from PAID orders, minus any refunded amounts
-    const spentAgg = await Order.aggregate([
-      { 
-        $match: { 
-          user: userObjectId, 
-          paymentStatus: 'paid',
-          status: { $ne: 'refunded' }
-        } 
-      },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+    // Single optimized aggregation to get all order data at once
+    const orderStats = await Order.aggregate([
+      { $match: { user: userObjectId } },
+      {
+        $group: {
+          _id: null,
+          totalOrders: { 
+            $sum: { 
+              $cond: [{ $nin: ['$status', ['cancelled', 'refunded']] }, 1, 0] 
+            }
+          },
+          totalSpent: { 
+            $sum: { 
+              $cond: [
+                { 
+                  $and: [
+                    { $eq: ['$paymentStatus', 'paid'] },
+                    { $ne: ['$status', 'refunded'] }
+                  ]
+                }, 
+                '$totalPrice', 
+                0
+              ] 
+            }
+          },
+          refundedAmount: { 
+            $sum: { 
+              $cond: [
+                { 
+                  $and: [
+                    { $eq: ['$status', 'refunded'] },
+                    { $eq: ['$paymentStatus', 'paid'] }
+                  ]
+                }, 
+                '$totalPrice', 
+                0
+              ] 
+            }
+          }
+        }
+      }
     ]);
 
-    // Subtract refunded amounts
-    const refundAgg = await Order.aggregate([
-      { 
-        $match: { 
-          user: userObjectId, 
-          status: 'refunded',
-          paymentStatus: 'paid' // Only subtract if was actually paid
-        } 
-      },
-      { $group: { _id: null, refunded: { $sum: '$totalPrice' } } }
-    ]);
-
-    const paidTotal = spentAgg.length ? spentAgg[0].total : 0;
-    const refundedTotal = refundAgg.length ? refundAgg[0].refunded : 0;
-    const totalSpent = Math.max(0, paidTotal - refundedTotal); // Ensure non-negative
-
-    // Loyalty points simple rule: 1 point per ₹10 spent (adjust later if needed)
-    const loyaltyPoints = Math.floor(totalSpent / 10);
-
+    // Get user wishlist count directly
+    const user = await User.findById(userId).select('wishlist').lean();
     const wishlistCount = user && Array.isArray(user.wishlist) ? user.wishlist.length : 0;
 
-    // Recent orders (latest 10)
+    // Extract results
+    const stats = orderStats[0] || { totalOrders: 0, totalSpent: 0, refundedAmount: 0 };
+    const orderCount = stats.totalOrders;
+    const totalSpent = Math.max(0, stats.totalSpent - stats.refundedAmount);
+    const loyaltyPoints = Math.floor(totalSpent / 10);
+
+    // Get recent orders separately (lighter query)
     const recentOrdersRaw = await Order.find({ user: userObjectId })
       .sort({ createdAt: -1 })
-      .limit(10)
+      .limit(5) // Reduced from 10 to 5 for faster query
       .select('orderNumber createdAt status totalPrice items trackingNumber')
       .lean();
 
     const recentOrders = recentOrdersRaw.map(o => ({
       id: o.orderNumber || o._id.toString(),
       date: o.createdAt,
-      items: Array.isArray(o.items) ? o.items.slice(0,3).map(i => i.name).join(', ') : 'Order',
+      items: Array.isArray(o.items) ? o.items.slice(0,2).map(i => i.name).join(', ') : 'Order',
       amount: o.totalPrice || 0,
       status: (o.status || 'processing').replace(/^(.)/, c => c.toUpperCase()),
       tracking: o.trackingNumber

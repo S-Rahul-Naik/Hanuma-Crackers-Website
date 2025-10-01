@@ -134,7 +134,7 @@ export default function Footer() {
                 href="https://edutech-2k25.netlify.app" 
                 className="text-yellow-300 hover:text-yellow-200 transition-colors duration-300"
               >
-                Website Builder
+                Website Builder : EduTech 2k25
               </a>
             </div>
           </div>

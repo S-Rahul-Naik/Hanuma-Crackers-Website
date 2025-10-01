@@ -211,4 +211,10 @@ orderSchema.methods.getFormattedAddress = function() {
   return `${addr.name}\n${addr.street}\n${addr.city}, ${addr.state} ${addr.pincode}\n${addr.country}\nPhone: ${addr.phone}`;
 };
 
+// Indexes for better dashboard query performance
+orderSchema.index({ user: 1, createdAt: -1 }); // For recent orders by user
+orderSchema.index({ user: 1, status: 1, paymentStatus: 1 }); // For dashboard aggregations
+orderSchema.index({ createdAt: -1 }); // For admin recent orders
+orderSchema.index({ orderNumber: 1 }); // For order lookup (already unique, but explicit index)
+
 module.exports = mongoose.model('Order', orderSchema);

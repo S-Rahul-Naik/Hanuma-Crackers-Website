@@ -25,7 +25,22 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function DashboardOverview({ user, onTabChange }: DashboardOverviewProps) {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<DashboardData | null>(() => {
+    // Try to load cached data from localStorage for instant display
+    try {
+      const cached = localStorage.getItem('dashboardData');
+      if (cached) {
+        const parsedData = JSON.parse(cached);
+        // Only use if it's recent (less than 5 minutes old)
+        if (parsedData.timestamp && Date.now() - parsedData.timestamp < 5 * 60 * 1000) {
+          return parsedData.data;
+        }
+      }
+    } catch (e) {
+      console.log('No cached dashboard data available');
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -52,19 +67,32 @@ export default function DashboardOverview({ user, onTabChange }: DashboardOvervi
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
-      const res = await fetch(`${API_URL}/api/dashboard/overview`, { credentials: 'include' });
+      
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const res = await fetch(`${API_URL}/api/dashboard/overview`, { 
+        credentials: 'include',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (!res.ok) throw new Error('Failed to load dashboard');
       const json = await res.json();
+      
       if (json && json.success !== false) {
-        const payload = json.data || json; // allow either shape
+        const payload = json.data || json;
         const normalized: DashboardData = {
           orderCount: Number(payload.orderCount) || 0,
           totalSpent: Number(payload.totalSpent) || 0,
           wishlistCount: Number(payload.wishlistCount) || 0,
           loyaltyPoints: Number(payload.loyaltyPoints) || 0,
           recentOrders: Array.isArray(payload.recentOrders)
-            ? payload.recentOrders.slice(0, 10).map((o: any) => ({
+            ? payload.recentOrders.slice(0, 5).map((o: any) => ({
                 id: o.id || o._id || 'ORD',
                 date: o.date || o.createdAt || '',
                 items: o.items || (Array.isArray(o.products) ? o.products.map((p: any) => p.name).join(', ') : ''),
@@ -76,9 +104,30 @@ export default function DashboardOverview({ user, onTabChange }: DashboardOvervi
         };
         setData(normalized);
         setError(null);
+        
+        // Cache the data in localStorage for instant loading next time
+        localStorage.setItem('dashboardData', JSON.stringify({
+          data: normalized,
+          timestamp: Date.now()
+        }));
       }
     } catch (err: any) {
-      setError(err.message || 'Error loading dashboard');
+      if (err.name === 'AbortError') {
+        setError('Request timeout - please try again');
+      } else {
+        setError(err.message || 'Error loading dashboard');
+      }
+      
+      // Set fallback data to prevent empty dashboard
+      if (!data) {
+        setData({
+          orderCount: 0,
+          totalSpent: 0,
+          wishlistCount: 0,
+          loyaltyPoints: 0,
+          recentOrders: []
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -88,16 +137,16 @@ export default function DashboardOverview({ user, onTabChange }: DashboardOvervi
     fetchData();
   }, [refreshKey]);
 
-  // Auto-refresh every 10 seconds when component is visible for real-time updates
+  // Auto-refresh every 30 seconds when component is visible (reduced frequency)
   useEffect(() => {
     const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && !loading) {
         fetchData();
       }
-    }, 10000); // Reduced from 30s to 10s for better real-time feel
+    }, 30000); // Increased from 10s to 30s to reduce server load
 
     return () => clearInterval(interval);
-  }, []);
+  }, [loading]);
 
   // Listen for custom wishlist, order, and payment update events
   useEffect(() => {
