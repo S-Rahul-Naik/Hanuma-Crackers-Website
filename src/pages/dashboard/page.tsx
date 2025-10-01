@@ -134,7 +134,7 @@ export default function UserDashboard() {
       case 'orders':
         return <OrderHistory user={user} />;
       case 'wishlist':
-        return <WishlistSection user={user} />;
+        return <WishlistSection user={user} cart={cart} onAddToCart={handleAddToCart} />;
       case 'profile':
         return <ProfileSettings user={user} />;
       default:

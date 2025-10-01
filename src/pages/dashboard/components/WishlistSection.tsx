@@ -6,7 +6,7 @@ interface WishlistItem {
   name: string;
   price: number;
   originalPrice?: number;
-  images: string[];
+  images: (string | { url: string })[];
   category: string;
   stock: number;
   addedDate?: string;
@@ -15,10 +15,11 @@ interface WishlistItem {
 
 interface WishlistSectionProps {
   user: any;
-  // cart props removed for global cart
+  cart?: { [key: string]: number };
+  onAddToCart?: (productId: string) => void;
 }
 
-export default function WishlistSection({ user }: WishlistSectionProps) {
+export default function WishlistSection({ user, cart, onAddToCart }: WishlistSectionProps) {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,9 +53,6 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
         const data = await response.json();
         console.log('Wishlist data:', data);
         setWishlistItems(data.data || []);
-        if (typeof onProductsLoaded === 'function') {
-          onProductsLoaded(data.data || []);
-        }
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.log('Error response:', errorData);
@@ -97,16 +95,16 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
   const addToCart = async (item: WishlistItem) => {
     if (item.stock === 0) return;
     try {
-      setCart(prev => ({
-        ...prev,
-        [item._id]: (prev[item._id] || 0) + 1
-      }));
-      if (!addToCart.bulkMode) {
+      if (onAddToCart) {
+        onAddToCart(item._id);
+      }
+      
+      if (!(addToCart as any).bulkMode) {
         alert(`${item.name} added to cart!`);
       }
     } catch (err) {
       console.error('Error adding to cart:', err);
-      if (!addToCart.bulkMode) {
+      if (!(addToCart as any).bulkMode) {
         alert('Failed to add item to cart');
       }
     }
@@ -139,11 +137,13 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
       return;
     }
     
-  // Set bulk mode flag to suppress notification
-  addToCart.bulkMode = true;
-  selectedProducts.forEach(item => addToCart(item));
-  addToCart.bulkMode = false;
-  setSelectedItems([]);
+    // Set bulk mode flag to suppress individual notifications
+    (addToCart as any).bulkMode = true;
+    selectedProducts.forEach(item => addToCart(item));
+    (addToCart as any).bulkMode = false;
+    
+    alert(`${selectedProducts.length} items added to cart!`);
+    setSelectedItems([]);
   };
 
   const clearWishlist = async () => {
@@ -333,7 +333,7 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
                     </div>
 
                     <div className="text-xs text-gray-500 mb-2">
-                      Added on {new Date(item.addedDate || item.createdAt).toLocaleDateString()}
+                      Added on {new Date(item.addedDate || item.createdAt || new Date()).toLocaleDateString()}
                     </div>
 
                     {item.stock > 0 ? (
