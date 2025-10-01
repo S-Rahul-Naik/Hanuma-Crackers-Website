@@ -6,7 +6,7 @@
   command = "npm run build"
   
   # The directory to publish (where the built files are located)
-  publish = "dist"
+  publish = "out"
 
 [build.environment]
   # Ensure we're using the correct Node.js version
