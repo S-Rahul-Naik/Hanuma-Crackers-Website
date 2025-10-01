@@ -358,11 +358,11 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Order History</h2>
-          <div className="flex items-center space-x-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Order History</h2>
+          <div className="flex items-center justify-between sm:justify-end sm:space-x-4">
             <button 
               onClick={fetchMyOrders}
               className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -390,38 +390,40 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
             </a>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {orders.map((order) => (
               <div
                 key={order._id}
-                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => setSelectedOrder(selectedOrder?._id === order._id ? null : order)}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                        <i className={`${getStatusIcon(order.status)} text-orange-600 text-lg`}></i>
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i className={`${getStatusIcon(order.status)} text-orange-600 text-base sm:text-lg`}></i>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{order.orderNumber}</h3>
-                      <p className="text-sm text-gray-500">Ordered on {formatDate(order.createdAt)}</p>
-                      <div className="flex items-center space-x-2 mt-1">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{order.orderNumber}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500">Ordered on {formatDate(order.createdAt)}</p>
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1">
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus)}`}>
-                          {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
-                        </span>
+                        {order.paymentStatus !== 'paid' && order.status !== 'cancelled' && (
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus)}`}>
+                            {order.paymentStatus.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">₹{order.totalPrice.toLocaleString()}</p>
-                    <p className="text-sm text-gray-500">{order.items.length} item{order.items.length > 1 ? 's' : ''}</p>
+                  <div className="text-left sm:text-right flex-shrink-0">
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">₹{order.totalPrice.toLocaleString()}</p>
+                    <p className="text-xs sm:text-sm text-gray-500">{order.items.length} item{order.items.length > 1 ? 's' : ''}</p>
                     {order.trackingNumber && (
-                      <p className="text-xs text-blue-600 mt-1">Track: {order.trackingNumber}</p>
+                      <p className="text-xs text-blue-600 mt-1 truncate">Track: {order.trackingNumber}</p>
                     )}
                   </div>
                 </div>
@@ -432,7 +434,7 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
                     <div className="space-y-3">
                       {order.items.map((item, index) => (
                         <div key={index} className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                             {item.image ? (
                               <img 
                                 src={item.image} 
@@ -443,13 +445,13 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
                               <i className="ri-gift-line text-gray-400"></i>
                             )}
                           </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900">{item.name}</p>
-                            <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{item.name}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">Quantity: {item.quantity}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="font-medium text-gray-900">₹{(item.price * item.quantity).toLocaleString()}</p>
-                            <p className="text-sm text-gray-500">₹{item.price} each</p>
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-medium text-gray-900 text-sm sm:text-base">₹{(item.price * item.quantity).toLocaleString()}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">₹{item.price} each</p>
                           </div>
                         </div>
                       ))}
@@ -467,11 +469,11 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
                       </div>
                     )}
                     
-                    <div className="mt-4 flex flex-wrap gap-3">
+                    <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
                       {(order.status === 'shipped' || order.status === 'processing' || order.status === 'delivered') && (
                         <button 
                           onClick={() => trackOrder(order)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+                          className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                         >
                           <i className="ri-truck-line mr-2"></i>
                           Track Order
@@ -480,7 +482,7 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
                       
                       <button 
                         onClick={() => downloadInvoice(order)}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+                        className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                       >
                         <i className="ri-download-line mr-2"></i>
                         Download Invoice
@@ -489,7 +491,7 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
                       {canCancelOrder(order) && (
                         <button 
                           onClick={() => handleCancelOrder(order)}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap"
+                          className="flex-1 sm:flex-none px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                         >
                           <i className="ri-close-line mr-2"></i>
                           Cancel Order
@@ -503,7 +505,7 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
                               handleOrderAction(order._id, 'return');
                             }
                           }}
-                          className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors whitespace-nowrap"
+                          className="flex-1 sm:flex-none px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm"
                         >
                           <i className="ri-arrow-go-back-line mr-2"></i>
                           Return Order
@@ -517,7 +519,7 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
                               handleOrderAction(order._id, 'refund');
                             }
                           }}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap"
+                          className="flex-1 sm:flex-none px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
                         >
                           <i className="ri-money-dollar-circle-line mr-2"></i>
                           Request Refund
