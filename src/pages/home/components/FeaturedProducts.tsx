@@ -94,6 +94,10 @@ interface FeaturedProductsProps {
 export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: _onUpdateQuantity, onRemoveItem: _onRemoveItem, onProductsLoaded }: FeaturedProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [categories, setCategories] = useState<string[]>(['All']); // Dynamic categories from DB
+  const [searchQuery, setSearchQuery] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
+  const [sortBy, setSortBy] = useState('newest');
+  const [showFilters, setShowFilters] = useState(false);
   const [showNotification, setShowNotification] = useState<{show: boolean, productName: string}>({show: false, productName: ''});
   const [wishlistNotification, setWishlistNotification] = useState<{show: boolean, productName: string, isAdded: boolean}>({show: false, productName: '', isAdded: false});
   const [loading, setLoading] = useState(true);
@@ -274,9 +278,40 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
     }
   };
 
-  const filteredProducts = selectedCategory === 'All'
-    ? products
-    : products.filter(product => product.category === selectedCategory);
+  const filteredProducts = products
+    .filter(product => {
+      // Category filter
+      if (selectedCategory !== 'All' && product.category !== selectedCategory) {
+        return false;
+      }
+      
+      // Search filter
+      if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      // Price range filter
+      if (product.price < priceRange.min || product.price > priceRange.max) {
+        return false;
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'category':
+          return a.category.localeCompare(b.category);
+        case 'newest':
+        default:
+          return 0; // Keep original order (newest first from backend)
+      }
+    });
 
     const addToCart = (productId: string, productName: string) => { // Function to add product to cart
     onAddToCart(productId, productName); // parent ignores productName currently
@@ -350,20 +385,120 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
           )}
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {categories.map((category) => (
+        {/* Advanced Filter Bar */}
+        <div className="bg-white rounded-xl shadow-lg border border-orange-100 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Search Bar */}
+            <div className="flex-1 min-w-0">
+              <div className="relative">
+                <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Category Dropdown */}
+            <div className="w-full lg:w-48">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category} {category !== 'All' ? `(${products.filter(p => p.category === category).length})` : `(${products.length})`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="w-full lg:w-48">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="newest">Newest First</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="name">Name: A to Z</option>
+                <option value="category">Category: A to Z</option>
+              </select>
+            </div>
+
+            {/* Price Filter Toggle */}
             <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 whitespace-nowrap cursor-pointer ${
-                selectedCategory === category
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg scale-105'
-                  : 'bg-white text-gray-700 hover:bg-orange-100 border border-orange-200 hover:border-orange-300'
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-4 py-3 rounded-lg font-medium transition-all duration-300 whitespace-nowrap ${
+                showFilters
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-orange-100'
               }`}
             >
-              {category}
+              <i className="ri-filter-line mr-2"></i>
+              Filters
+              {showFilters && <i className="ri-arrow-up-line ml-2"></i>}
+              {!showFilters && <i className="ri-arrow-down-line ml-2"></i>}
             </button>
-          ))}
+          </div>
+
+          {/* Expandable Price Range Filter */}
+          {showFilters && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price Range: ₹{priceRange.min} - ₹{priceRange.max}
+                  </label>
+                  <div className="flex gap-3">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={priceRange.min}
+                      onChange={(e) => setPriceRange(prev => ({ ...prev, min: parseInt(e.target.value) || 0 }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                    <span className="self-center text-gray-500">to</span>
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={priceRange.max}
+                      onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) || 5000 }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-end">
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedCategory('All');
+                      setPriceRange({ min: 0, max: 5000 });
+                      setSortBy('newest');
+                    }}
+                    className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                  >
+                    <i className="ri-refresh-line mr-2"></i>
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Results Count */}
+          <div className="mt-4 text-sm text-gray-600 text-center">
+            Showing {filteredProducts.length} of {products.length} products
+            {searchQuery && ` for "${searchQuery}"`}
+            {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" data-product-shop="true">

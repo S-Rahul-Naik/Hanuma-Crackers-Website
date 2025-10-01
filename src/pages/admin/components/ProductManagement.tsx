@@ -35,14 +35,19 @@ export default function ProductManagement() {
   });
   const [imageError, setImageError] = useState<string>('');
 
-  // Remove hardcoded categories - admin can now create custom categories
+  // State for existing categories and autocomplete
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
-  fetch(`${API_URL}/api/products?limit=100`, {
-    credentials: 'include',
-    signal: controller.signal,
-  })
+    
+    // Fetch products and extract categories
+    fetch(`${API_URL}/api/products?limit=100`, {
+      credentials: 'include',
+      signal: controller.signal,
+    })
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.products)) {
@@ -57,6 +62,10 @@ export default function ProductManagement() {
             status: p.isActive ? 'active' : 'inactive'
           }));
           setProducts(mapped);
+          
+          // Extract unique categories for autocomplete
+          const uniqueCategories = Array.from(new Set(mapped.map((p: any) => p.category).filter(Boolean))) as string[];
+          setExistingCategories(uniqueCategories.sort());
         }
       })
       .catch(() => {})
@@ -176,6 +185,26 @@ export default function ProductManagement() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Handle category autocomplete
+    if (name === 'category') {
+      if (value.trim()) {
+        const filtered = existingCategories.filter(cat => 
+          cat.toLowerCase().startsWith(value.toLowerCase())
+        );
+        setFilteredSuggestions(filtered);
+        setShowSuggestions(filtered.length > 0);
+      } else {
+        setShowSuggestions(false);
+        setFilteredSuggestions([]);
+      }
+    }
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setFormData(prev => ({ ...prev, category }));
+    setShowSuggestions(false);
+    setFilteredSuggestions([]);
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -354,7 +383,7 @@ export default function ProductManagement() {
                   />
                 </div>
 
-                <div>
+                <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Category
                   </label>
@@ -363,11 +392,49 @@ export default function ProductManagement() {
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
+                    onFocus={() => {
+                      if (formData.category.trim()) {
+                        const filtered = existingCategories.filter(cat => 
+                          cat.toLowerCase().startsWith(formData.category.toLowerCase())
+                        );
+                        setFilteredSuggestions(filtered);
+                        setShowSuggestions(filtered.length > 0);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Delay hiding suggestions to allow clicking on them
+                      setTimeout(() => setShowSuggestions(false), 200);
+                    }}
                     placeholder="Enter category (e.g., Sparklers, Bombs, Rockets)"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">Create a new category or use existing ones</p>
+                  
+                  {/* Autocomplete suggestions */}
+                  {showSuggestions && filteredSuggestions.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                      {filteredSuggestions.map((category, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleCategorySelect(category)}
+                          className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600 border-b border-gray-100 last:border-b-0 transition-colors"
+                        >
+                          <span className="flex items-center">
+                            <i className="ri-tag-line mr-2 text-orange-500"></i>
+                            {category}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-gray-500 mt-1">
+                    {existingCategories.length > 0 
+                      ? `Type to see suggestions from ${existingCategories.length} existing categories, or create a new one`
+                      : 'Create a new category or use existing ones'
+                    }
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
