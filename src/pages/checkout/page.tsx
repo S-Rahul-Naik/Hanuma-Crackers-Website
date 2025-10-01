@@ -430,9 +430,9 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className={`grid grid-cols-1 gap-8 ${step !== 'receipt' && step !== 'confirmation' ? 'lg:grid-cols-3' : ''}`}>
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className={step !== 'receipt' && step !== 'confirmation' ? 'lg:col-span-2' : ''}>
             {/* Step 1: Shipping Details */}
             {step === 'details' && (
               <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -812,123 +812,125 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* Order Summary Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
-              
-              <div className="space-y-4 mb-6">
-                {checkoutData.items.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-3">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-12 h-12 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+          {/* Order Summary Sidebar - Hidden on receipt and confirmation steps */}
+          {step !== 'receipt' && step !== 'confirmation' && (
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl shadow-sm p-6 sticky top-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+                
+                <div className="space-y-4 mb-6">
+                  {checkoutData.items.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-3">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                      </div>
+                      <p className="text-sm font-semibold text-gray-900">₹{item.price * item.quantity}</p>
                     </div>
-                    <p className="text-sm font-semibold text-gray-900">₹{item.price * item.quantity}</p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              {/* Coupon Section */}
-              {!appliedCoupon ? (
-                <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Have a Coupon Code?</h4>
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      placeholder="Enter coupon code"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                    <button
-                      onClick={applyCoupon}
-                      disabled={couponLoading || !couponCode.trim()}
-                      className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {couponLoading ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      ) : (
-                        'Apply'
-                      )}
-                    </button>
-                  </div>
-                  {couponError && (
-                    <p className="text-red-600 text-xs mt-2">{couponError}</p>
-                  )}
-                  <div className="mt-3 text-xs text-gray-600">
-                    <p className="font-medium mb-1">Available coupons:</p>
-                    <div className="grid grid-cols-2 gap-1">
-                      <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE5 - 5% OFF</span>
-                      <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE10 - 10% OFF</span>
-                      <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE20 - 20% OFF</span>
-                      <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE25 - 25% OFF</span>
+                {/* Coupon Section */}
+                {!appliedCoupon ? (
+                  <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Have a Coupon Code?</h4>
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="Enter coupon code"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      />
+                      <button
+                        onClick={applyCoupon}
+                        disabled={couponLoading || !couponCode.trim()}
+                        className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {couponLoading ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          'Apply'
+                        )}
+                      </button>
+                    </div>
+                    {couponError && (
+                      <p className="text-red-600 text-xs mt-2">{couponError}</p>
+                    )}
+                    <div className="mt-3 text-xs text-gray-600">
+                      <p className="font-medium mb-1">Available coupons:</p>
+                      <div className="grid grid-cols-2 gap-1">
+                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE5 - 5% OFF</span>
+                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE10 - 10% OFF</span>
+                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE20 - 20% OFF</span>
+                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE25 - 25% OFF</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-semibold text-green-800">Coupon Applied! 🎉</h4>
-                    <button
-                      onClick={removeCoupon}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Remove
-                    </button>
+                ) : (
+                  <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-green-800">Coupon Applied! 🎉</h4>
+                      <button
+                        onClick={removeCoupon}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-green-700">
+                        {appliedCoupon.coupon.code} ({appliedCoupon.coupon.discountPercentage}% OFF)
+                      </span>
+                      <span className="text-sm font-semibold text-green-800">
+                        -₹{appliedCoupon.discount.totalDiscount}
+                      </span>
+                    </div>
+                    {appliedCoupon.coupon.description && (
+                      <p className="text-xs text-green-600 mt-1">{appliedCoupon.coupon.description}</p>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-green-700">
-                      {appliedCoupon.coupon.code} ({appliedCoupon.coupon.discountPercentage}% OFF)
-                    </span>
-                    <span className="text-sm font-semibold text-green-800">
-                      -₹{appliedCoupon.discount.totalDiscount}
-                    </span>
-                  </div>
-                  {appliedCoupon.coupon.description && (
-                    <p className="text-xs text-green-600 mt-1">{appliedCoupon.coupon.description}</p>
-                  )}
-                </div>
-              )}
+                )}
 
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">Subtotal:</span>
-                  <span className="font-semibold">₹{checkoutData.totalPrice}</span>
-                </div>
-                {appliedCoupon && (
+                <div className="border-t pt-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-green-600">Discount ({appliedCoupon.coupon.code}):</span>
-                    <span className="font-semibold text-green-600">-₹{appliedCoupon.discount.totalDiscount}</span>
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="font-semibold">₹{checkoutData.totalPrice}</span>
                   </div>
-                )}
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">Shipping:</span>
-                  <span className={`font-semibold ${getShippingCost() === 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                    {getShippingCost() === 0 ? 'Free' : `₹${getShippingCost()}`}
-                  </span>
-                </div>
-                {getShippingCost() > 0 && (
-                  <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-                    <i className="ri-information-line mr-1"></i>
-                    {appliedCoupon 
-                      ? `Add ₹${2000 - appliedCoupon.discount.discountedTotal} more for free shipping!`
-                      : `Add ₹${2000 - getFinalTotal()} more for free shipping!`
-                    }
+                  {appliedCoupon && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-green-600">Discount ({appliedCoupon.coupon.code}):</span>
+                      <span className="font-semibold text-green-600">-₹{appliedCoupon.discount.totalDiscount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Shipping:</span>
+                    <span className={`font-semibold ${getShippingCost() === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                      {getShippingCost() === 0 ? 'Free' : `₹${getShippingCost()}`}
+                    </span>
                   </div>
-                )}
-                <div className="flex justify-between items-center text-lg font-bold">
-                  <span>Total:</span>
-                  <span className="text-green-600">₹{getTotalWithShipping()}</span>
+                  {getShippingCost() > 0 && (
+                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                      <i className="ri-information-line mr-1"></i>
+                      {appliedCoupon 
+                        ? `Add ₹${2000 - appliedCoupon.discount.discountedTotal} more for free shipping!`
+                        : `Add ₹${2000 - getFinalTotal()} more for free shipping!`
+                      }
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-lg font-bold">
+                    <span>Total:</span>
+                    <span className="text-green-600">₹{getTotalWithShipping()}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
