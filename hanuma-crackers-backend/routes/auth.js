@@ -157,6 +157,52 @@ router.post('/promote-admin', async (req, res) => {
   }
 });
 
+// Debug session validation route
+router.get('/test-session/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const Session = require('../models/Session');
+    const User = require('../models/User');
+    
+    console.log('Testing session:', sessionId);
+    
+    // Find session
+    const session = await Session.findOne({
+      sessionId,
+      isActive: true,
+      expiresAt: { $gt: new Date() }
+    });
+    
+    console.log('Found session:', session);
+    
+    if (!session) {
+      return res.json({ error: 'No session found' });
+    }
+    
+    // Find user
+    const user = await User.findById(session.userId);
+    console.log('Found user:', user);
+    
+    // Test populate
+    const sessionWithUser = await Session.findOne({
+      sessionId,
+      isActive: true,
+      expiresAt: { $gt: new Date() }
+    }).populate('userId');
+    
+    console.log('Session with populate:', sessionWithUser);
+    
+    res.json({
+      success: true,
+      session: session,
+      user: user,
+      sessionWithUser: sessionWithUser?.userId
+    });
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
 // Routes
 router.post('/register', registerValidation, handleValidationErrors, register);
 router.post('/login', loginValidation, handleValidationErrors, login);
