@@ -16,7 +16,8 @@ export default function UserDashboard() {
     const controller = new AbortController();
     (async () => {
       try {
-        const res = await fetch('/api/products?limit=40', { signal: controller.signal });
+        const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/products?limit=40`, { signal: controller.signal });
         if (!res.ok) throw new Error('Failed to load products');
         const data = await res.json();
         if (data.success && Array.isArray(data.products)) {

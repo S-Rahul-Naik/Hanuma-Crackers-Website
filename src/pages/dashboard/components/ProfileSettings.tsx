@@ -101,7 +101,8 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
     }
     setSavingPassword(true);
     try {
-      const res = await fetch('/api/auth/updatepassword', {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/auth/updatepassword`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
