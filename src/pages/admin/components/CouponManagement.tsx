@@ -110,9 +110,10 @@ export default function CouponManagement() {
         validUntil: formData.validUntil || null
       };
 
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
       const url = editingCoupon 
-        ? `/api/admin/coupons/${editingCoupon._id}`
-        : '/api/admin/coupons';
+        ? `${API_URL}/api/admin/coupons/${editingCoupon._id}`
+        : `${API_URL}/api/admin/coupons`;
       
       const method = editingCoupon ? 'PUT' : 'POST';
 
@@ -198,7 +199,8 @@ export default function CouponManagement() {
 
     for (const coupon of predefinedCoupons) {
       try {
-        await fetch('/api/admin/coupons', {
+        const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+        await fetch(`${API_URL}/api/admin/coupons`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
