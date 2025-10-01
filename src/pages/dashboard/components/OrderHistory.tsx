@@ -55,9 +55,10 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching orders from:', '/api/orders/myorders');
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      console.log('Fetching orders from:', `${API_URL}/api/orders/myorders`);
       
-      const response = await fetch('/api/orders/myorders', {
+      const response = await fetch(`${API_URL}/api/orders/myorders`, {
         credentials: 'include'
       });
       
