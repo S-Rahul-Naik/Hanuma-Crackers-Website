@@ -87,7 +87,12 @@ export default function CheckoutPage() {
 
   const fetchPaymentSettings = async () => {
     try {
-      const response = await fetch('/api/admin/payment-settings');
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_URL}/api/admin/payment-settings`, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.settings) {
@@ -198,10 +203,15 @@ export default function CheckoutPage() {
       const taxPrice = 0;
       const shippingPrice = getShippingCost();
       const totalPrice = finalItemsPrice + taxPrice + shippingPrice;
-      
-      const res = await fetch('/api/orders', {
+
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem('auth_token');
+      const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({
           items,
@@ -215,13 +225,6 @@ export default function CheckoutPage() {
           totalPrice
         })
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.success === false) {
-        throw new Error(data.message || 'Failed to create order');
-      }
-      setOrderNumber(data.order?.orderNumber || '');
-      setOrderId(data.order?._id || '');
-      
       // Mark coupon as used if applied
       if (appliedCoupon) {
         try {

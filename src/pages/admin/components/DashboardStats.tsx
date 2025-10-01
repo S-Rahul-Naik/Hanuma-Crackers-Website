@@ -1,3 +1,4 @@
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
 
 import { useState, useEffect } from 'react';
 
@@ -34,8 +35,10 @@ export default function DashboardStats() {
       setLoading(true);
       
       // Fetch dashboard overview data
-      const dashboardResponse = await fetch('/api/dashboard/overview', {
-        credentials: 'include'
+      const token = localStorage.getItem('auth_token');
+      const dashboardResponse = await fetch(`${API_URL}/api/dashboard/overview`, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       
       if (dashboardResponse.ok) {
