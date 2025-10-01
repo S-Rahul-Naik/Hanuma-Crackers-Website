@@ -42,6 +42,7 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelOrder, setCancelOrder] = useState<Order | null>(null);
   const [cancelReason, setCancelReason] = useState('');
