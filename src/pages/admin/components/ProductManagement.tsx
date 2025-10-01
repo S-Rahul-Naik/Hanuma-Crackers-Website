@@ -286,14 +286,14 @@ export default function ProductManagement() {
 
       {/* Products Grid */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
-              <div className="aspect-square bg-gradient-to-r from-orange-100 to-red-100" />
-              <div className="p-6 space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-2/3" />
-                <div className="h-3 bg-gray-200 rounded w-1/3" />
-                <div className="h-10 bg-gray-200 rounded w-full" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+              <div className="h-32 md:h-36 bg-gradient-to-r from-orange-100 to-red-100" />
+              <div className="p-2 md:p-3 space-y-2">
+                <div className="h-3 bg-gray-200 rounded w-2/3" />
+                <div className="h-2 bg-gray-200 rounded w-1/3" />
+                <div className="h-6 bg-gray-200 rounded w-full" />
               </div>
             </div>
           ))}
@@ -304,19 +304,16 @@ export default function ProductManagement() {
           No products yet. Click <span className="font-medium text-orange-600">Add Product</span> to create one.
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="aspect-square">
+          <div key={product.id} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
+            <div className="relative overflow-hidden h-32 md:h-36">
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
-            </div>
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-semibold text-gray-900 text-lg">{product.name}</h3>
+              <div className="absolute top-2 right-2">
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                   product.status === 'active' 
                     ? 'bg-green-100 text-green-800' 
@@ -325,43 +322,50 @@ export default function ProductManagement() {
                   {product.status}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 mb-2">{product.category}</p>
-              <p className="text-sm text-gray-500 mb-4 line-clamp-2">{product.description}</p>
+            </div>
+            <div className="p-2 md:p-3">
+              <div className="mb-1">
+                <span className="text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full font-medium">
+                  {product.category}
+                </span>
+              </div>
+              <h3 className="font-semibold text-gray-900 text-xs md:text-sm mb-1 line-clamp-2">{product.name}</h3>
+              <p className="text-xs text-gray-500 mb-2 line-clamp-1">{product.description}</p>
               
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-2">
                 <div>
-                  <div className="text-xl font-bold text-orange-600">₹{product.price}</div>
+                  <div className="text-sm md:text-base font-bold text-orange-600">₹{product.price}</div>
                   {product.originalPrice && product.originalPrice > product.price && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
-                      <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="text-xs text-gray-400 line-through">₹{product.originalPrice}</span>
+                      <span className="text-xs bg-green-100 text-green-600 px-1 py-0.5 rounded-full font-medium">
                         {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
                       </span>
                     </div>
                   )}
                 </div>
-                <div className="text-sm text-gray-500">Stock: {product.stock}</div>
+                <div className="text-xs text-gray-500">Stock: {product.stock}</div>
               </div>
 
-              <div className="flex space-x-2">
+              <div className="flex space-x-1">
                 <button
                   onClick={() => handleEditProduct(product)}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg font-medium transition-colors whitespace-nowrap"
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-2 rounded-md text-xs font-medium transition-colors"
                 >
                   <i className="ri-edit-line mr-1"></i>
-                  Edit
+                  <span className="hidden md:inline">Edit</span>
                 </button>
                 <button
                   onClick={() => handleDeleteProduct(product.id)}
-                  className={`flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium transition-colors whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed`}
+                  className={`flex-1 bg-red-500 hover:bg-red-600 text-white py-1.5 px-2 rounded-md text-xs font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                   disabled={deletingId === product.id}
                 >
                   {deletingId === product.id ? (
-                    <span className="flex items-center justify-center gap-1"><i className="ri-loader-4-line animate-spin" /> Deleting...</span>
+                    <i className="ri-loader-4-line animate-spin" />
                   ) : (
                     <>
                       <i className="ri-delete-bin-line mr-1"></i>
-                      Delete
+                      <span className="hidden md:inline">Delete</span>
                     </>
                   )}
                 </button>
