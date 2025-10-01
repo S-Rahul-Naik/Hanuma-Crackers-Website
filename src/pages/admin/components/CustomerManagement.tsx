@@ -46,8 +46,10 @@ export default function CustomerManagement() {
         ...(statusFilter !== 'all' && { status: statusFilter })
       });
 
-  const response = await fetch(`${API_URL}/api/admin/customers?${queryParams}`, {
-        credentials: 'include'
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_URL}/api/admin/customers?${queryParams}`, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       
       if (response.ok) {

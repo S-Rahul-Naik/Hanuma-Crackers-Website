@@ -59,8 +59,10 @@ export default function ReceiptManagement() {
 
   const fetchOrdersWithReceipts = async () => {
     try {
-  const response = await fetch(`${API_URL}/api/admin/orders-with-receipts`, {
-        credentials: 'include'
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_URL}/api/admin/orders-with-receipts`, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await response.json();
       if (data.success) {

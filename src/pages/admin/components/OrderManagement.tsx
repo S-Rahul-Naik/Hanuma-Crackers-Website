@@ -43,9 +43,11 @@ export default function OrderManagement() {
         ...(statusFilter !== 'all' && { status: statusFilter })
       });
 
+  const token = localStorage.getItem('auth_token');
   const response = await fetch(`${API_URL}/api/admin/orders?${queryParams}`, {
-        credentials: 'include'
-      });
+    credentials: 'include',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
       
       console.log('Response status:', response.status);
       console.log('Response URL:', response.url);
@@ -103,10 +105,12 @@ export default function OrderManagement() {
     try {
       setUpdateStatus({ orderId, updating: true });
       
-      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_URL}/api/admin/orders/${orderId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         credentials: 'include',
         body: JSON.stringify({ status: newStatus })

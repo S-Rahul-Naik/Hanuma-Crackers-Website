@@ -43,8 +43,10 @@ export default function RefundManagement() {
 
   const fetchRefundRequests = async () => {
     try {
-  const response = await fetch(`${API_URL}/api/orders/refund-requests`, {
-        credentials: 'include'
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${API_URL}/api/orders/refund-requests`, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (response.ok) {

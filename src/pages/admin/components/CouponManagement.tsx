@@ -70,9 +70,11 @@ export default function CouponManagement() {
 
   const fetchCoupons = async () => {
     try {
+  const token = localStorage.getItem('auth_token');
   const response = await fetch(`${API_URL}/api/admin/coupons`, {
-        credentials: 'include'
-      });
+    credentials: 'include',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
       const data = await response.json();
       if (data.success) {
         setCoupons(data.coupons);
