@@ -10,6 +10,12 @@ exports.protect = async (req, res, next) => {
   // Check for session ID in cookies (primary method)
   if (req.cookies && req.cookies.sessionId) {
     sessionId = req.cookies.sessionId;
+    console.log('Found session in cookies:', sessionId);
+  }
+  // Fallback: Check for session in custom header (for debugging)
+  else if (req.headers['x-session-id']) {
+    sessionId = req.headers['x-session-id'];
+    console.log('Found session in header:', sessionId);
   }
   // Fallback: Check for JWT token in headers (for API clients)
   else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
