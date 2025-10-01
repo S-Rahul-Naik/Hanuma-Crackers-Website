@@ -303,3 +303,25 @@ exports.getProductsByCategory = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all unique categories
+// @route   GET /api/products/categories
+// @access  Public
+exports.getCategories = async (req, res, next) => {
+  try {
+    const categories = await Product.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: "$category" } },
+      { $project: { _id: 0, name: "$_id" } },
+      { $sort: { name: 1 } }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      count: categories.length,
+      categories: categories.map(cat => cat.name).filter(Boolean)
+    });
+  } catch (error) {
+    next(error);
+  }
+};

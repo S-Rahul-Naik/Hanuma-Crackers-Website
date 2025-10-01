@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 
-const categories = ['All', 'Sparklers', 'Bombs', 'Rockets', 'Assorted Packs', 'Kids Special'];
+// Categories will be fetched dynamically from the database
 
 // Initial static products act as a fallback until backend loads
 const staticProducts = [
@@ -93,6 +93,7 @@ interface FeaturedProductsProps {
 
 export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: _onUpdateQuantity, onRemoveItem: _onRemoveItem, onProductsLoaded }: FeaturedProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [categories, setCategories] = useState<string[]>(['All']); // Dynamic categories from DB
   const [showNotification, setShowNotification] = useState<{show: boolean, productName: string}>({show: false, productName: ''});
   const [wishlistNotification, setWishlistNotification] = useState<{show: boolean, productName: string, isAdded: boolean}>({show: false, productName: '', isAdded: false});
   const [loading, setLoading] = useState(true);
@@ -101,18 +102,26 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
   const [wishlistLoading, setWishlistLoading] = useState<Set<string>>(new Set());
   // Products start empty; we hydrate instantly from cache if present to avoid perceived delay
   const [products, setProducts] = useState<any[]>([]);
-  // Fetch products directly from server (no client-side persistent caching per policy)
+  // Fetch products and categories separately for better performance
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
-    (async () => {
+    
+    const fetchData = async () => {
       try {
-          const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
-  const res = await fetch(`${API_URL}/api/products?limit=40`); // No abort signal for infinite rate limit
-        if (!res.ok) throw new Error('Failed to load products');
-        const data = await res.json();
-        if (data.success && Array.isArray(data.products)) {
-          const mapped = data.products.map((p: any) => ({
+        const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+        
+        // Fetch products and categories in parallel
+        const [productsRes, categoriesRes] = await Promise.all([
+          fetch(`${API_URL}/api/products?limit=40`),
+          fetch(`${API_URL}/api/products/categories`).catch(() => null) // Optional endpoint
+        ]);
+        
+        if (!productsRes.ok) throw new Error('Failed to load products');
+        const productsData = await productsRes.json();
+        
+        if (productsData.success && Array.isArray(productsData.products)) {
+          const mapped = productsData.products.map((p: any) => ({
             id: p._id?.toString(),
             name: p.name,
             category: p.category || 'Misc',
@@ -123,8 +132,23 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
             bestseller: p.totalSales ? p.totalSales > 150 : false,
             combo: p.tags ? p.tags.includes('combo') : false
           }));
+          
+          // Try to get categories from dedicated endpoint, fallback to extracting from products
+          let allCategories = ['All'];
+          if (categoriesRes && categoriesRes.ok) {
+            const categoriesData = await categoriesRes.json();
+            if (categoriesData.success && Array.isArray(categoriesData.categories)) {
+              allCategories = ['All', ...categoriesData.categories.sort()];
+            }
+          } else {
+            // Fallback: Extract unique categories from products
+            const uniqueCategories = Array.from(new Set(mapped.map((product: any) => product.category).filter(Boolean))) as string[];
+            allCategories = ['All', ...uniqueCategories.sort()];
+          }
+          
           if (isMounted) {
             setProducts(mapped);
+            setCategories(allCategories);
             if (onProductsLoaded) onProductsLoaded(mapped);
             setError(null);
           }
@@ -134,13 +158,18 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
           setError(err.message || 'Error loading products');
           if (products.length === 0) {
             setProducts(staticProducts);
+            // Extract categories from static products as fallback
+            const staticCategories = Array.from(new Set(staticProducts.map(product => product.category).filter(Boolean))) as string[];
+            setCategories(['All', ...staticCategories.sort()]);
             if (onProductsLoaded) onProductsLoaded(staticProducts);
           }
         }
       } finally {
         if (isMounted) setLoading(false);
       }
-    })();
+    };
+    
+    fetchData();
     return () => { isMounted = false; controller.abort(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

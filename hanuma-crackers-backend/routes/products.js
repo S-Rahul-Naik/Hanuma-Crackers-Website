@@ -7,7 +7,8 @@ const {
   deleteProduct,
   getFeaturedProducts,
   searchProducts,
-  getProductsByCategory
+  getProductsByCategory,
+  getCategories
 } = require('../controllers/productController');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -16,6 +17,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getProducts);
+router.get('/categories', getCategories);
 router.get('/featured', getFeaturedProducts);
 router.get('/search', searchProducts);
 router.get('/category/:category', getProductsByCategory);
