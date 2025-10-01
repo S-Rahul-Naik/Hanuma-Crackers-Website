@@ -32,17 +32,18 @@ export default function CustomerManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchCustomers();
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, currentPage]);
 
   const fetchCustomers = async () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
         ...(searchTerm && { search: searchTerm }),
-        ...(roleFilter && { role: roleFilter }),
+        ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
         page: currentPage.toString(),
         limit: '10'
       });

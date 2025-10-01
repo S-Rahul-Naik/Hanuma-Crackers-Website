@@ -119,6 +119,44 @@ router.post('/test-login', async (req, res) => {
   }
 });
 
+// Temporary admin promotion route for testing
+router.post('/promote-admin', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const User = require('../models/User');
+    
+    const user = await User.findOneAndUpdate(
+      { email: email || 'admin@hanuma.com' },
+      { role: 'admin' },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'User promoted to admin',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to promote user',
+      error: error.message
+    });
+  }
+});
+
 // Routes
 router.post('/register', registerValidation, handleValidationErrors, register);
 router.post('/login', loginValidation, handleValidationErrors, login);

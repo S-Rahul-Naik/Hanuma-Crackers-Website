@@ -49,7 +49,7 @@ exports.protect = async (req, res, next) => {
       sessionId,
       isActive: true,
       expiresAt: { $gt: new Date() }
-    }).populate('userId');
+    });
 
     if (!session) {
       // Clear invalid cookie
@@ -64,8 +64,11 @@ exports.protect = async (req, res, next) => {
       });
     }
 
+    // Get user from session userId
+    const user = await User.findById(session.userId);
+    
     // Check if user still exists and is active
-    if (!session.userId || !session.userId.isActive) {
+    if (!user || !user.isActive) {
       await session.updateOne({ isActive: false });
       res.clearCookie('sessionId', {
         httpOnly: true,
@@ -81,7 +84,7 @@ exports.protect = async (req, res, next) => {
     // Update last activity
     await session.updateActivity();
 
-    req.user = session.userId;
+    req.user = user;
     req.session = session;
     next();
   } catch (error) {
