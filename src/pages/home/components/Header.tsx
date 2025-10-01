@@ -52,7 +52,11 @@ export default function Header({ cartItems, onCartClick }: HeaderProps) {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-orange-600" style={{ fontFamily: '"Pacifico", serif' }}>
+            <h1 
+              className="text-2xl font-bold text-orange-600 cursor-pointer select-none" 
+              style={{ fontFamily: '"Pacifico", serif' }}
+              onClick={() => scrollToSection('home')}
+            >
               Hanuma Crackers
             </h1>
           </div>

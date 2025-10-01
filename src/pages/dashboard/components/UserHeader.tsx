@@ -32,7 +32,7 @@ export default function UserHeader({ user, activeTab, setActiveTab, cartItems }:
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <h1 className="text-xl sm:text-2xl font-bold text-orange-600 mr-4 sm:mr-8" style={{ fontFamily: '"Pacifico", serif' }}>
+              <h1 className="text-xl sm:text-2xl font-bold text-orange-600 mr-4 sm:mr-8 select-none" style={{ fontFamily: '"Pacifico", serif' }}>
                 <span className="hidden sm:inline">Hanuma Crackers</span>
                 <span className="sm:hidden">Hanuma Crackers</span>
               </h1>

@@ -27,6 +27,9 @@ export default function ContactForm() {
 
     try {
   const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+  console.log('Submitting contact form to:', `${API_URL}/api/contact`);
+  console.log('Form data:', formData);
+  
   const response = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
         headers: {
@@ -35,7 +38,11 @@ export default function ContactForm() {
         body: JSON.stringify(formData)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.ok && data.success) {
         setSubmitStatus('success');
