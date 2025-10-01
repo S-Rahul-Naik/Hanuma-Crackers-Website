@@ -32,12 +32,12 @@ exports.register = async (req, res, next) => {
     // Create secure session
     const session = await createSession(user, req);
 
-    // Set HTTP-only cookie
+    // Set HTTP-only cookie for cross-origin authentication
     res.cookie('sessionId', session.sessionId, {
       expires: session.expiresAt,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
 
     res.status(201).json({
@@ -100,12 +100,12 @@ exports.login = async (req, res, next) => {
     // Create secure session
     const session = await createSession(user, req);
 
-    // Set HTTP-only cookie
+    // Set HTTP-only cookie for cross-origin authentication
     res.cookie('sessionId', session.sessionId, {
       expires: session.expiresAt,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
 
     res.status(200).json({
@@ -132,11 +132,11 @@ exports.logout = async (req, res, next) => {
       await clearSession(req.cookies.sessionId);
     }
 
-    // Clear cookie
+    // Clear cookie for cross-origin support
     res.clearCookie('sessionId', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
 
     res.status(200).json({

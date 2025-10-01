@@ -13,7 +13,7 @@ const cookieParser = require('cookie-parser');
 dotenv.config();
 
 // Validate required environment variables early
-const requiredEnv = ['JWT_SECRET', 'JWT_EXPIRE'];
+const requiredEnv = ['JWT_SECRET', 'JWT_EXPIRE', 'MONGODB_URI'];
 const missingEnv = requiredEnv.filter((k) => !process.env[k]);
 if (missingEnv.length) {
   // eslint-disable-next-line no-console
