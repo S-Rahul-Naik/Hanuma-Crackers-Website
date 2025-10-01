@@ -215,6 +215,6 @@ orderSchema.methods.getFormattedAddress = function() {
 orderSchema.index({ user: 1, createdAt: -1 }); // For recent orders by user
 orderSchema.index({ user: 1, status: 1, paymentStatus: 1 }); // For dashboard aggregations
 orderSchema.index({ createdAt: -1 }); // For admin recent orders
-orderSchema.index({ orderNumber: 1 }); // For order lookup (already unique, but explicit index)
+// Note: orderNumber index is automatically created by unique: true property
 
 module.exports = mongoose.model('Order', orderSchema);
