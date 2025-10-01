@@ -1,6 +1,7 @@
 
 interface DashboardOverviewProps {
   user: any; // initial user object (basic auth info only)
+  onTabChange?: (tab: string) => void; // Add tab navigation prop
 }
 
 interface RecentOrder {
@@ -21,12 +22,33 @@ interface DashboardData {
 }
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function DashboardOverview({ user }: DashboardOverviewProps) {
+export default function DashboardOverview({ user, onTabChange }: DashboardOverviewProps) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const navigate = useNavigate();
+
+  // Handle Track Now button click
+  const handleTrackOrders = () => {
+    if (onTabChange) {
+      onTabChange('orders');
+    }
+  };
+
+  // Handle Contact Us button click
+  const handleContactUs = () => {
+    navigate('/#contact');
+    // Scroll to contact section after navigation
+    setTimeout(() => {
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
 
   const fetchData = async () => {
     try {
@@ -297,7 +319,10 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
             </div>
             <h3 className="font-semibold text-gray-900 mb-2">Track Orders</h3>
             <p className="text-gray-600 text-sm mb-4">Monitor your order status and delivery updates</p>
-            <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap">
+            <button 
+              onClick={handleTrackOrders}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap"
+            >
               Track Now
             </button>
           </div>
@@ -310,7 +335,10 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
             </div>
             <h3 className="font-semibold text-gray-900 mb-2">Support</h3>
             <p className="text-gray-600 text-sm mb-4">Get help with your orders or product questions</p>
-            <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap">
+            <button 
+              onClick={handleContactUs}
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap"
+            >
               Contact Us
             </button>
           </div>

@@ -9,6 +9,7 @@ const staticProducts = [
     id: '1',
     name: 'Premium Golden Sparklers Pack',
     category: 'Sparklers',
+    description: 'Beautiful golden sparklers with long-lasting golden effects. Perfect for creating magical moments during festivals.',
     price: 299,
     originalPrice: 399,
     discount: 25,
@@ -19,6 +20,7 @@ const staticProducts = [
     id: '2',
     name: 'Thunder Bomb Crackers Set',
     category: 'Bombs',
+    description: 'High-quality thunder bombs that create spectacular sound effects. Safe and tested for amazing celebrations.',
     price: 599,
     originalPrice: 799,
     discount: 25,
@@ -29,6 +31,7 @@ const staticProducts = [
     id: '3',
     name: 'Sky Rocket Fireworks Bundle',
     category: 'Rockets',
+    description: 'Colorful rockets that soar high into the sky with beautiful burst patterns. Premium quality for grand celebrations.',
     price: 899,
     originalPrice: 1199,
     discount: 25,
@@ -38,6 +41,7 @@ const staticProducts = [
     id: '4',
     name: 'Festival Combo Pack Deluxe',
     category: 'Assorted Packs',
+    description: 'Complete festival pack with variety of crackers including sparklers, bombs, and rockets. Perfect for family celebrations.',
     price: 1499,
     originalPrice: 2199,
     discount: 32,
@@ -48,6 +52,7 @@ const staticProducts = [
     id: '5',
     name: 'Safe Kids Fireworks Kit',
     category: 'Kids Special',
+    description: 'Child-safe fireworks designed specially for kids. Mild effects with maximum safety and colorful fun.',
     price: 249,
     originalPrice: 349,
     discount: 29,
@@ -57,6 +62,7 @@ const staticProducts = [
     id: '6',
     name: 'Rainbow Sparkler Collection',
     category: 'Sparklers',
+    description: 'Multi-colored sparklers that create rainbow effects. Premium quality with vibrant colors for memorable moments.',
     price: 449,
     originalPrice: 599,
     discount: 25,
@@ -66,6 +72,7 @@ const staticProducts = [
     id: '7',
     name: 'Ground Spinner Wheel Set',
     category: 'Assorted Packs',
+    description: 'Exciting ground spinners that create beautiful rotating wheel effects with colorful sparks and patterns.',
     price: 199,
     originalPrice: 299,
     discount: 33,
@@ -75,6 +82,7 @@ const staticProducts = [
     id: '8',
     name: 'Mega Celebration Bundle',
     category: 'Assorted Packs',
+    description: 'Ultimate celebration package with premium crackers, sparklers, and aerial fireworks for grand festivities.',
     price: 2499,
     originalPrice: 3499,
     discount: 29,
@@ -129,9 +137,11 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
             id: p._id?.toString(),
             name: p.name,
             category: p.category || 'Misc',
+            description: p.description || '',
             price: p.price,
-            originalPrice: p.price && p.discountPrice ? p.price : p.price * 1.2,
-            discount: p.discountPrice ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0,
+            originalPrice: p.originalPrice || p.price,
+            discount: p.originalPrice && p.originalPrice > p.price ? 
+              Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0,
             image: p.images && p.images.length > 0 ? p.images[0].url : 'https://via.placeholder.com/400x300?text=No+Image',
             bestseller: p.totalSales ? p.totalSales > 150 : false,
             combo: p.tags ? p.tags.includes('combo') : false
@@ -558,9 +568,15 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
 
               <div className="p-5">
                 <div className="text-sm text-purple-600 font-medium mb-1">{product.category}</div>
-                <h3 className="font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300">
+                <h3 className="font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300">
                   {product.name}
                 </h3>
+                
+                {/* Product Description */}
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                  {product.description || 'Premium quality cracker for your celebrations'}
+                </p>
+                
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
                   <span className="text-sm text-gray-500 line-through">₹{(product.price * 1.15).toFixed(2)}</span>

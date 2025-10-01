@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CartSidebar from '../home/components/CartSidebar';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
@@ -130,7 +130,7 @@ export default function UserDashboard() {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <DashboardOverview user={user} />;
+        return <DashboardOverview user={user} onTabChange={setActiveTab} />;
       case 'orders':
         return <OrderHistory user={user} />;
       case 'wishlist':
@@ -138,7 +138,7 @@ export default function UserDashboard() {
       case 'profile':
         return <ProfileSettings user={user} />;
       default:
-        return <DashboardOverview user={user} />;
+        return <DashboardOverview user={user} onTabChange={setActiveTab} />;
     }
   };
 

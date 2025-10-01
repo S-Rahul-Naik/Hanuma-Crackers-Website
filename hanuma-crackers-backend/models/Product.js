@@ -15,30 +15,23 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Please provide a category'],
-    enum: {
-      values: [
-        'Flower Pots',
-        'Rockets',
-        'Ground Spinners',
-        'Sparklers',
-        'Bombs',
-        'Chakras',
-        'Multi-shots',
-        'Gift Boxes',
-        'Eco-friendly',
-        'Safety Items'
-      ],
-      message: 'Please select a valid category'
-    }
+    trim: true
   },
   price: {
     type: Number,
-    required: [true, 'Please provide a price'],
+    required: [true, 'Please provide a sale price'],
     min: [0, 'Price cannot be negative']
   },
-  discountPrice: {
+  originalPrice: {
     type: Number,
-    min: [0, 'Discount price cannot be negative']
+    required: [true, 'Please provide an original price'],
+    min: [0, 'Original price cannot be negative']
+  },
+  discountPercentage: {
+    type: Number,
+    min: [0, 'Discount percentage cannot be negative'],
+    max: [100, 'Discount percentage cannot be more than 100'],
+    default: 0
   },
   stock: {
     type: Number,
@@ -111,22 +104,14 @@ productSchema.index({ price: 1 });
 productSchema.index({ isActive: 1 });
 productSchema.index({ isFeatured: 1 });
 
-// Calculate discount percentage
-productSchema.virtual('discountPercentage').get(function() {
-  if (this.discountPrice && this.price > this.discountPrice) {
-    return Math.round(((this.price - this.discountPrice) / this.price) * 100);
-  }
-  return 0;
-});
-
 // Check if product is in stock
 productSchema.virtual('inStock').get(function() {
   return this.stock > 0;
 });
 
-// Get effective price (discount price if available, otherwise regular price)
+// Get effective price (current sale price)
 productSchema.virtual('effectivePrice').get(function() {
-  return this.discountPrice && this.discountPrice < this.price ? this.discountPrice : this.price;
+  return this.price;
 });
 
 // Ensure virtuals are included in JSON

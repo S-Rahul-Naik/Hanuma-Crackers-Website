@@ -7,6 +7,7 @@ interface Product {
   name: string;
   category: string;
   price: number;
+  originalPrice?: number;
   stock: number;
   image: string;
   description: string;
@@ -25,6 +26,7 @@ export default function ProductManagement() {
     name: '',
     category: '',
     price: '',
+    originalPrice: '',
     stock: '',
     description: '',
     status: 'active' as 'active' | 'inactive',
@@ -56,6 +58,7 @@ export default function ProductManagement() {
             name: p.name,
             category: p.category,
             price: p.price,
+            originalPrice: p.originalPrice,
             stock: p.stock,
             image: p.images && p.images.length > 0 ? p.images[0].url : '',
             description: p.description,
@@ -78,6 +81,7 @@ export default function ProductManagement() {
       name: '',
       category: '',
       price: '',
+      originalPrice: '',
       stock: '',
       description: '',
       status: 'active',
@@ -95,6 +99,7 @@ export default function ProductManagement() {
       name: product.name,
       category: product.category,
       price: product.price.toString(),
+      originalPrice: (product as any).originalPrice?.toString() || (product.price * 1.2).toString(),
       stock: product.stock.toString(),
       description: product.description,
       status: product.status,
@@ -114,20 +119,32 @@ export default function ProductManagement() {
       return;
     }
     setImageError('');
+    
+    const price = parseFloat(formData.price);
+    const originalPrice = parseFloat(formData.originalPrice);
+    
+    // Calculate discount percentage
+    const discountPercentage = originalPrice > price ? 
+      Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+    
     const productData: any = {
       name: formData.name,
       category: formData.category,
-      price: parseFloat(formData.price),
+      price: price,
+      originalPrice: originalPrice,
+      discountPercentage: discountPercentage,
       stock: parseInt(formData.stock),
       description: formData.description,
       isActive: formData.status === 'active'
     };
+    
     if (formData.image) {
       productData.image = formData.image;
     }
     if (formData.imagePublicId) {
       productData.imagePublicId = formData.imagePublicId;
     }
+    
     // Persist to backend
     await fetch(`${API_URL}/api/products`, {
       method: 'POST',
@@ -137,6 +154,7 @@ export default function ProductManagement() {
       credentials: 'include',
       body: JSON.stringify(productData)
     });
+    
     // Refresh products from backend
     fetch(`${API_URL}/api/products`, {
       credentials: 'include',
@@ -150,6 +168,7 @@ export default function ProductManagement() {
               name: p.name,
               category: p.category,
               price: p.price,
+              originalPrice: p.originalPrice,
               stock: p.stock,
               image: p.images && p.images.length > 0 ? p.images[0].url : '',
               description: p.description,
@@ -205,6 +224,17 @@ export default function ProductManagement() {
     setFormData(prev => ({ ...prev, category }));
     setShowSuggestions(false);
     setFilteredSuggestions([]);
+  };
+
+  // Calculate discount percentage in real-time
+  const calculateDiscountPercentage = () => {
+    const price = parseFloat(formData.price) || 0;
+    const originalPrice = parseFloat(formData.originalPrice) || 0;
+    
+    if (originalPrice > 0 && originalPrice > price) {
+      return Math.round(((originalPrice - price) / originalPrice) * 100);
+    }
+    return 0;
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,7 +329,17 @@ export default function ProductManagement() {
               <p className="text-sm text-gray-500 mb-4 line-clamp-2">{product.description}</p>
               
               <div className="flex items-center justify-between mb-4">
-                <div className="text-xl font-bold text-orange-600">₹{product.price}</div>
+                <div>
+                  <div className="text-xl font-bold text-orange-600">₹{product.price}</div>
+                  {product.originalPrice && product.originalPrice > product.price && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
+                      <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">
+                        {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                      </span>
+                    </div>
+                  )}
+                </div>
                 <div className="text-sm text-gray-500">Stock: {product.stock}</div>
               </div>
 
@@ -440,7 +480,23 @@ export default function ProductManagement() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Price (₹)
+                      Original Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      name="originalPrice"
+                      value={formData.originalPrice}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      required
+                      min="0"
+                      step="0.01"
+                      placeholder="MRP"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sale Price (₹)
                     </label>
                     <input
                       type="number"
@@ -451,8 +507,29 @@ export default function ProductManagement() {
                       required
                       min="0"
                       step="0.01"
+                      placeholder="Selling price"
                     />
                   </div>
+                </div>
+
+                {/* Auto-calculated discount display */}
+                {formData.originalPrice && formData.price && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-green-800">
+                        Auto-calculated Discount:
+                      </span>
+                      <span className="text-lg font-bold text-green-600">
+                        {calculateDiscountPercentage()}% OFF
+                      </span>
+                    </div>
+                    <div className="text-xs text-green-600 mt-1">
+                      Savings: ₹{Math.max(0, parseFloat(formData.originalPrice) - parseFloat(formData.price)).toFixed(2)}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Stock

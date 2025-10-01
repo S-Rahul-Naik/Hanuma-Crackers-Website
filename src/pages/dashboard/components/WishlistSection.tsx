@@ -267,16 +267,16 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
             </div>
 
             {/* Wishlist Items */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {wishlistItems.map((item) => (
-                <div key={item._id} className="relative bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow w-full max-w-xs mx-auto" style={{ minWidth: 220 }}>
+                <div key={item._id} className="relative bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow w-full">
                   {item.stock > 0 && (
                     <div className="absolute top-2 left-2 z-20">
                       <input
                         type="checkbox"
                         checked={selectedItems.includes(item._id)}
                         onChange={() => toggleSelectItem(item._id)}
-                        className="w-4 h-4 text-orange-600 bg-white border-gray-300 rounded focus:ring-orange-500 shadow-sm"
+                        className="w-3 h-3 text-orange-600 bg-white border-gray-300 rounded focus:ring-orange-500 shadow-sm"
                       />
                     </div>
                   )}
@@ -284,9 +284,9 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
                   {/* Remove button always on top */}
                   <button
                     onClick={() => removeFromWishlist(item._id)}
-                    className="absolute top-2 right-2 z-30 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 transition-colors"
+                    className="absolute top-2 right-2 z-30 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 transition-colors"
                   >
-                    <i className="ri-close-line text-gray-600 hover:text-red-600 text-base"></i>
+                    <i className="ri-close-line text-gray-600 hover:text-red-600 text-sm"></i>
                   </button>
 
                   {item.stock === 0 && (
@@ -297,7 +297,7 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
                     </div>
                   )}
 
-                  <div className="w-full h-36 bg-gray-100 overflow-hidden">
+                  <div className="w-full h-32 md:h-36 bg-gray-100 overflow-hidden">
                     <img
                       src={
                         item.images && item.images.length > 0
@@ -311,18 +311,18 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
                     />
                   </div>
 
-                  <div className="p-3">
+                  <div className="p-2 md:p-3">
                     <div className="mb-1">
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
                         {item.category}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-sm">{item.name}</h3>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-base font-bold text-gray-900">₹{item.price.toLocaleString()}</span>
+                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-xs md:text-sm">{item.name}</h3>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center space-x-1">
+                        <span className="text-sm md:text-base font-bold text-gray-900">₹{item.price.toLocaleString()}</span>
                         {item.originalPrice && (
-                          <span className="text-sm text-gray-500 line-through">₹{item.originalPrice.toLocaleString()}</span>
+                          <span className="text-xs text-gray-500 line-through">₹{item.originalPrice.toLocaleString()}</span>
                         )}
                       </div>
                       {item.originalPrice && (
@@ -332,24 +332,24 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
                       )}
                     </div>
 
-                    <div className="text-xs text-gray-500 mb-3">
+                    <div className="text-xs text-gray-500 mb-2">
                       Added on {new Date(item.addedDate || item.createdAt).toLocaleDateString()}
                     </div>
 
                     {item.stock > 0 ? (
                       <button
                         onClick={() => addToCart(item)}
-                        className="w-full py-2 px-4 rounded-lg font-medium transition-colors whitespace-nowrap bg-orange-600 text-white hover:bg-orange-700"
+                        className="w-full py-1.5 md:py-2 px-2 md:px-4 rounded-md font-medium transition-colors whitespace-nowrap bg-orange-600 text-white hover:bg-orange-700 text-xs md:text-sm"
                       >
-                        <i className="ri-shopping-cart-line mr-2"></i>
+                        <i className="ri-shopping-cart-line mr-1"></i>
                         Add to Cart
                       </button>
                     ) : (
                       <button
                         disabled
-                        className="w-full py-2 px-4 rounded-lg font-medium transition-colors whitespace-nowrap bg-gray-200 text-gray-500 cursor-not-allowed"
+                        className="w-full py-1.5 md:py-2 px-2 md:px-4 rounded-md font-medium transition-colors whitespace-nowrap bg-gray-200 text-gray-500 cursor-not-allowed text-xs md:text-sm"
                       >
-                        <i className="ri-shopping-cart-line mr-2"></i>
+                        <i className="ri-shopping-cart-line mr-1"></i>
                         Out of Stock
                       </button>
                     )}
@@ -359,20 +359,6 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
             </div>
           </>
         )}
-      </div>
-
-      {/* Recommended Items */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">You Might Also Like</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer">
-              <div className="aspect-square bg-gray-100 rounded-lg mb-2"></div>
-              <h4 className="font-medium text-sm text-gray-900 mb-1">Recommended Item {item}</h4>
-              <p className="text-orange-600 font-semibold text-sm">₹{(item * 200).toLocaleString()}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
