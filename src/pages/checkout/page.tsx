@@ -789,7 +789,7 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <span className="text-gray-600">Estimated Delivery:</span>
-                      <p className="font-bold text-gray-800">2-3 hours</p>
+                      <p className="font-bold text-gray-800">3-7 days</p>
                     </div>
                   </div>
                 </div>

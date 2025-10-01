@@ -2,6 +2,7 @@
 interface DashboardOverviewProps {
   user: any; // initial user object (basic auth info only)
   onTabChange?: (tab: string) => void; // Add tab navigation prop
+  wishlistCount?: number; // Optional wishlist count from parent component
 }
 
 interface RecentOrder {
@@ -24,7 +25,7 @@ interface DashboardData {
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function DashboardOverview({ user, onTabChange }: DashboardOverviewProps) {
+export default function DashboardOverview({ user, onTabChange, wishlistCount: propWishlistCount }: DashboardOverviewProps) {
   const [data, setData] = useState<DashboardData | null>(() => {
     // Try to load cached data from localStorage for instant display
     try {
@@ -175,7 +176,7 @@ export default function DashboardOverview({ user, onTabChange }: DashboardOvervi
 
   const orderCount = data?.orderCount || 0;
   const totalSpent = data?.totalSpent || 0;
-  const wishlistCount = data?.wishlistCount || 0;
+  const wishlistCount = data?.wishlistCount || propWishlistCount || 0; // Use prop as fallback
   const loyaltyPoints = data?.loyaltyPoints || 0;
   const orders: RecentOrder[] = data?.recentOrders || [];
 
