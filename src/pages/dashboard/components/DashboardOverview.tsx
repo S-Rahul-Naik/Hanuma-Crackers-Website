@@ -26,47 +26,65 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const fetchData = async () => {
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/dashboard/overview`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to load dashboard');
+      const json = await res.json();
+      if (json && json.success !== false) {
+        const payload = json.data || json; // allow either shape
+        const normalized: DashboardData = {
+          orderCount: Number(payload.orderCount) || 0,
+          totalSpent: Number(payload.totalSpent) || 0,
+          wishlistCount: Number(payload.wishlistCount) || 0,
+          loyaltyPoints: Number(payload.loyaltyPoints) || 0,
+          recentOrders: Array.isArray(payload.recentOrders)
+            ? payload.recentOrders.slice(0, 10).map((o: any) => ({
+                id: o.id || o._id || 'ORD',
+                date: o.date || o.createdAt || '',
+                items: o.items || (Array.isArray(o.products) ? o.products.map((p: any) => p.name).join(', ') : ''),
+                amount: Number(o.amount || o.total || 0),
+                status: o.status || 'Processing',
+                tracking: o.tracking || o.trackingNumber || undefined
+              }))
+            : []
+        };
+        setData(normalized);
+        setError(null);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error loading dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-    const fetchData = async () => {
-      try {
-        const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/dashboard/overview`, { signal: controller.signal, credentials: 'include' });
-        if (!res.ok) throw new Error('Failed to load dashboard');
-        const json = await res.json();
-        if (isMounted && json && json.success !== false) {
-          const payload = json.data || json; // allow either shape
-          const normalized: DashboardData = {
-            orderCount: Number(payload.orderCount) || 0,
-            totalSpent: Number(payload.totalSpent) || 0,
-            wishlistCount: Number(payload.wishlistCount) || 0,
-            loyaltyPoints: Number(payload.loyaltyPoints) || 0,
-            recentOrders: Array.isArray(payload.recentOrders)
-              ? payload.recentOrders.slice(0, 10).map((o: any) => ({
-                  id: o.id || o._id || 'ORD',
-                  date: o.date || o.createdAt || '',
-                  items: o.items || (Array.isArray(o.products) ? o.products.map((p: any) => p.name).join(', ') : ''),
-                  amount: Number(o.amount || o.total || 0),
-                  status: o.status || 'Processing',
-                  tracking: o.tracking || o.trackingNumber || undefined
-                }))
-              : []
-          };
-          setData(normalized);
-          setError(null);
-        }
-      } catch (err: any) {
-        if (isMounted && err.name !== 'AbortError') {
-          setError(err.message || 'Error loading dashboard');
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
     fetchData();
-    return () => { isMounted = false; controller.abort(); };
+  }, [refreshKey]);
+
+  // Auto-refresh every 30 seconds when component is visible
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchData();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Listen for custom wishlist update events
+  useEffect(() => {
+    const handleWishlistUpdate = () => {
+      setRefreshKey(prev => prev + 1);
+    };
+
+    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
+    return () => window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
   }, []);
 
   const orderCount = data?.orderCount || 0;

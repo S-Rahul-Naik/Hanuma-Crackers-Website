@@ -82,6 +82,9 @@ export default function WishlistSection({ user }: WishlistSectionProps) {
       if (response.ok) {
         setWishlistItems(prev => prev.filter(item => item._id !== itemId));
         setSelectedItems(prev => prev.filter(id => id !== itemId));
+        
+        // Dispatch custom event to refresh dashboard
+        window.dispatchEvent(new CustomEvent('wishlistUpdated'));
       } else {
         throw new Error('Failed to remove item');
       }

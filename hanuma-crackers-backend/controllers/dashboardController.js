@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Product = require('../models/Product');
+const mongoose = require('mongoose');
 
 // Simple in-memory cache (per instance) to reduce aggregation cost
 const CACHE = new Map();
@@ -40,8 +41,9 @@ exports.getDashboardOverview = async (req, res, next) => {
     const user = await User.findById(userId).select('wishlist totalSpent totalOrders');
 
     // Orders aggregate (count + sum). Using totalPrice from schema.
+    const userObjectId = new mongoose.Types.ObjectId(userId);
     const orderAgg = await Order.aggregate([
-      { $match: { user: userId } },
+      { $match: { user: userObjectId } },
       { $group: { _id: null, count: { $sum: 1 }, total: { $sum: '$totalPrice' } } }
     ]);
 
@@ -54,7 +56,7 @@ exports.getDashboardOverview = async (req, res, next) => {
     const wishlistCount = user && Array.isArray(user.wishlist) ? user.wishlist.length : 0;
 
     // Recent orders (latest 10)
-    const recentOrdersRaw = await Order.find({ user: userId })
+    const recentOrdersRaw = await Order.find({ user: userObjectId })
       .sort({ createdAt: -1 })
       .limit(10)
       .select('orderNumber createdAt status totalPrice items trackingNumber')

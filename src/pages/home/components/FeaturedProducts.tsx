@@ -198,6 +198,9 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
           
           // Show notification
           setWishlistNotification({show: true, productName, isAdded: false});
+          
+          // Dispatch custom event to refresh dashboard
+          window.dispatchEvent(new CustomEvent('wishlistUpdated'));
         } else {
           throw new Error('Failed to remove from wishlist');
         }
@@ -216,6 +219,9 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
           setWishlistItems(prev => new Set([...prev, productId]));
           // Show notification
           setWishlistNotification({show: true, productName, isAdded: true});
+          
+          // Dispatch custom event to refresh dashboard
+          window.dispatchEvent(new CustomEvent('wishlistUpdated'));
         } else {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.message || 'Failed to add to wishlist');
