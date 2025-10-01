@@ -42,12 +42,10 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
-        url: `${API_URL}/api/orders/${orderId}/${action}`,
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelOrder, setCancelOrder] = useState<Order | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelComment, setCancelComment] = useState('');
-      const response = await fetch(`${API_URL}/api/orders/${orderId}/${action}`, {
   useEffect(() => {
     fetchMyOrders();
   }, []);
