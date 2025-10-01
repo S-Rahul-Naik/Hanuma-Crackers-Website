@@ -1,4 +1,30 @@
-const nodemailer = require('nodemailer');
+const no  createTransporter() {
+    // Use Gmail SMTP (you can change this based on your email provider)
+    const config = {
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER, // Your Gmail address
+        pass: process.env.EMAIL_PASS  // Your Gmail app password
+      },
+      // Add timeout configurations
+      connectionTimeout: 10000, // 10 seconds
+      socketTimeout: 10000, // 10 seconds
+      greetingTimeout: 5000, // 5 seconds
+      tls: {
+        rejectUnauthorized: false
+      }
+    };
+
+    // For other email providers, you can use SMTP settings
+    if (process.env.SMTP_HOST) {
+      config.host = process.env.SMTP_HOST;
+      config.port = process.env.SMTP_PORT || 587;
+      config.secure = process.env.SMTP_SECURE === 'true';
+      delete config.service;
+    }
+
+    return nodemailer.createTransporter(config);
+  }nodemailer');
 const logger = require('./logger');
 
 class EmailService {
@@ -257,10 +283,18 @@ class EmailService {
     };
 
     try {
-      // Send both emails
-      await Promise.all([
-        this.transporter.sendMail(businessEmail),
-        this.transporter.sendMail(confirmationEmail)
+      // Add timeout wrapper for email sending
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Email sending timeout after 15 seconds')), 15000);
+      });
+
+      // Send both emails with timeout
+      await Promise.race([
+        Promise.all([
+          this.transporter.sendMail(businessEmail),
+          this.transporter.sendMail(confirmationEmail)
+        ]),
+        timeoutPromise
       ]);
 
       logger.info('Contact form emails sent successfully', {

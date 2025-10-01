@@ -30,14 +30,20 @@ export default function ContactForm() {
   console.log('Submitting contact form to:', `${API_URL}/api/contact`);
   console.log('Form data:', formData);
   
+  // Add timeout to prevent hanging
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+  
   const response = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       console.log('Response status:', response.status);
       console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
@@ -58,7 +64,14 @@ export default function ContactForm() {
       }
     } catch (error) {
       console.error('Contact form error:', error);
-      setSubmitStatus('error');
+      
+      // Handle different types of errors
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('Request timeout - contact form submission took too long');
+        setSubmitStatus('error');
+      } else {
+        setSubmitStatus('error');
+      }
     } finally {
       setIsSubmitting(false);
     }

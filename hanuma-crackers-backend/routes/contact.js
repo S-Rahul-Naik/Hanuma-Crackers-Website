@@ -166,24 +166,27 @@ router.post('/', contactFormLimit, validateContactForm, async (req, res) => {
     console.log(`Message: ${message}`);
     console.log('---');
 
-    // Try to send emails, but don't fail if email service is not configured
-    try {
-      await emailService.sendContactEmail({
-        name,
-        email,
-        phone,
-        subject,
-        message
-      });
-      console.log('✅ Emails sent successfully');
-    } catch (emailError) {
-      console.log('⚠️ Email service not configured, but form submission logged successfully');
-      console.log('Email error:', emailError.message);
-    }
-
+    // Send immediate response to user, then send emails asynchronously
     res.json({
       success: true,
       message: "Your message has been sent successfully! We'll get back to you within 24 hours."
+    });
+
+    // Send emails asynchronously in the background (non-blocking)
+    setImmediate(async () => {
+      try {
+        await emailService.sendContactEmail({
+          name,
+          email,
+          phone,
+          subject,
+          message
+        });
+        console.log('✅ Emails sent successfully (background)');
+      } catch (emailError) {
+        console.log('⚠️ Email service not configured, but form submission logged successfully');
+        console.log('Email error:', emailError.message);
+      }
     });
 
   } catch (error) {
