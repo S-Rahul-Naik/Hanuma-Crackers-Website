@@ -40,15 +40,43 @@ exports.getDashboardOverview = async (req, res, next) => {
     // Get user basic aggregates
     const user = await User.findById(userId).select('wishlist totalSpent totalOrders');
 
-    // Orders aggregate (count + sum). Using totalPrice from schema.
+    // Orders aggregate - only count PAID orders for total spent
+    // Total orders count = all orders except cancelled/refunded
     const userObjectId = new mongoose.Types.ObjectId(userId);
-    const orderAgg = await Order.aggregate([
-      { $match: { user: userObjectId } },
-      { $group: { _id: null, count: { $sum: 1 }, total: { $sum: '$totalPrice' } } }
+    
+    // Count all orders (except cancelled/refunded)
+    const orderCount = await Order.countDocuments({ 
+      user: userObjectId, 
+      status: { $nin: ['cancelled', 'refunded'] } 
+    });
+
+    // Calculate total spent - only from PAID orders, minus any refunded amounts
+    const spentAgg = await Order.aggregate([
+      { 
+        $match: { 
+          user: userObjectId, 
+          paymentStatus: 'paid',
+          status: { $ne: 'refunded' }
+        } 
+      },
+      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
     ]);
 
-    const orderCount = orderAgg.length ? orderAgg[0].count : 0;
-    const totalSpent = orderAgg.length ? orderAgg[0].total : 0;
+    // Subtract refunded amounts
+    const refundAgg = await Order.aggregate([
+      { 
+        $match: { 
+          user: userObjectId, 
+          status: 'refunded',
+          paymentStatus: 'paid' // Only subtract if was actually paid
+        } 
+      },
+      { $group: { _id: null, refunded: { $sum: '$totalPrice' } } }
+    ]);
+
+    const paidTotal = spentAgg.length ? spentAgg[0].total : 0;
+    const refundedTotal = refundAgg.length ? refundAgg[0].refunded : 0;
+    const totalSpent = Math.max(0, paidTotal - refundedTotal); // Ensure non-negative
 
     // Loyalty points simple rule: 1 point per ₹10 spent (adjust later if needed)
     const loyaltyPoints = Math.floor(totalSpent / 10);

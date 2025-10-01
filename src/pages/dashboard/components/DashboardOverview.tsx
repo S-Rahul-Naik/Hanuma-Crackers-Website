@@ -66,25 +66,40 @@ export default function DashboardOverview({ user }: DashboardOverviewProps) {
     fetchData();
   }, [refreshKey]);
 
-  // Auto-refresh every 30 seconds when component is visible
+  // Auto-refresh every 10 seconds when component is visible for real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchData();
       }
-    }, 30000);
+    }, 10000); // Reduced from 30s to 10s for better real-time feel
 
     return () => clearInterval(interval);
   }, []);
 
-  // Listen for custom wishlist update events
+  // Listen for custom wishlist, order, and payment update events
   useEffect(() => {
     const handleWishlistUpdate = () => {
       setRefreshKey(prev => prev + 1);
     };
 
+    const handleOrderPlaced = () => {
+      setRefreshKey(prev => prev + 1);
+    };
+
+    const handlePaymentStatusUpdate = () => {
+      setRefreshKey(prev => prev + 1);
+    };
+
     window.addEventListener('wishlistUpdated', handleWishlistUpdate);
-    return () => window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
+    window.addEventListener('orderPlaced', handleOrderPlaced);
+    window.addEventListener('paymentStatusUpdated', handlePaymentStatusUpdate);
+    
+    return () => {
+      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
+      window.removeEventListener('orderPlaced', handleOrderPlaced);
+      window.removeEventListener('paymentStatusUpdated', handlePaymentStatusUpdate);
+    };
   }, []);
 
   const orderCount = data?.orderCount || 0;

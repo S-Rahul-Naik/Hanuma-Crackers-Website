@@ -228,6 +228,9 @@ export default function CheckoutPage() {
         // Set the order ID and order number for receipt upload
         setOrderId(orderData.order._id);
         setOrderNumber(orderData.order.orderNumber);
+        
+        // Dispatch custom event to refresh dashboard order count
+        window.dispatchEvent(new CustomEvent('orderPlaced'));
       } else {
         throw new Error(orderData.message || 'Failed to create order');
       }
@@ -312,6 +315,9 @@ export default function CheckoutPage() {
 
       if (response.ok && data.success) {
         setStep('confirmation');
+        
+        // Dispatch event as payment is being verified (affects total spent calculation)
+        window.dispatchEvent(new CustomEvent('paymentStatusUpdated'));
       } else {
         throw new Error(data.message || 'Failed to upload receipt');
       }
