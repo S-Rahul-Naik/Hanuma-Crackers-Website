@@ -64,21 +64,34 @@ app.use(hpp({
   whitelist: ['sort', 'fields', 'page', 'limit', 'category', 'price']
 }));
 
-// Rate limiting for production security
+// Rate limiting for production security - more lenient for auth
 const limiter = rateLimit({
-  windowMs: process.env.RATE_LIMIT_WINDOW || 15 * 60 * 1000, // 15 minutes
-  max: process.env.RATE_LIMIT_MAX || 100, // limit each IP to 100 requests per windowMs
+  windowMs: process.env.RATE_LIMIT_WINDOW || 150* 60 * 1000, // 15 minutes
+  max: process.env.RATE_LIMIT_MAX || 3000// Increased from 100 to 300 requests per windowMs
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.'
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip rate limiting for admin panel in development
+  // Skip rate limiting for development and auth endpoints
   skip: (req) => {
-    return process.env.NODE_ENV === 'development' && 
-           (req.path.startsWith('/api/admin') || req.path.startsWith('/api/auth/me'));
+    return process.env.NODE_ENV === 'development' || 
+           req.path.startsWith('/api/auth') ||
+           req.path.startsWith('/api/admin');
   }
+});
+
+// Separate, more lenient rate limiter for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 login attempts per 15 minutes per IP
+  message: {
+    success: false,
+    message: 'Too many login attempts, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
 });
 
 // Apply rate limiting
@@ -138,7 +151,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', auth);
+app.use('/api/auth', authLimiter, auth); // Apply specific auth rate limiting
 app.use('/api/products', products);
 app.use('/api/orders', orders);
 app.use('/api/users', users);
