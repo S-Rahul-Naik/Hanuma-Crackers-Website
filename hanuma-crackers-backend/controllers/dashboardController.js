@@ -25,6 +25,9 @@ exports.getDashboardOverview = async (req, res, next) => {
   try {
     const userId = req.user.id || req.user._id;
     
+    // Log the request for debugging
+    console.log('Dashboard request for user:', userId, 'Role:', req.user.role);
+    
     // Check if user is admin
     if (req.user.role === 'admin') {
       return getAdminDashboard(req, res, next);
@@ -120,7 +123,15 @@ exports.getDashboardOverview = async (req, res, next) => {
 
     res.json({ success: true, data });
   } catch (err) {
-    next(err);
+    console.error('Dashboard overview error:', err);
+    console.error('User ID:', req.user?.id || req.user?._id);
+    console.error('User Role:', req.user?.role);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch dashboard data',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
   }
 };
 
@@ -185,10 +196,12 @@ const getAdminDashboard = async (req, res, next) => {
     res.json(data);
   } catch (error) {
     console.error('Error fetching admin dashboard data:', error);
+    console.error('Admin user:', req.user?.id || req.user?._id);
+    
     res.status(500).json({
       success: false,
-      message: 'Server error',
-      error: error.message
+      message: 'Failed to fetch admin dashboard data',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Server error'
     });
   }
 };

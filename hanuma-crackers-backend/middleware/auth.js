@@ -89,8 +89,18 @@ exports.protect = async (req, res, next) => {
 
     req.user = session.userId;
     req.session = session;
+    
+    // Add debugging log for user data
+    console.log('User authenticated:', {
+      id: req.user._id,
+      email: req.user.email,
+      role: req.user.role,
+      isActive: req.user.isActive
+    });
+    
     next();
   } catch (error) {
+    console.error('Auth middleware error:', error);
     return res.status(401).json({
       success: false,
       message: 'Not authorized to access this route'
