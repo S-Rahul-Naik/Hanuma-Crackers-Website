@@ -17,19 +17,19 @@ export default function SignIn() {
     e.preventDefault();
     setIsLoading(true);
     try {
-  const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
-  const res = await fetch(`${API_URL}/api/auth/login`, {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        credentials: 'include', // Enable cookies
         body: JSON.stringify({
           email: formData.email,
           password: formData.password
         })
       });
       const data = await res.json();
-      if (data.success && data.user && data.token) {
-        localStorage.setItem('auth_token', data.token);
+      if (data.success && data.user) {
+        // No need to store token - it's in HTTP-only cookie
         await refresh();
         navigate(data.user.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
       } else {

@@ -41,15 +41,14 @@ export default function CustomerManagement() {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
-        limit: '50',
         ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter !== 'all' && { status: statusFilter })
+        ...(roleFilter && { role: roleFilter }),
+        page: currentPage.toString(),
+        limit: '10'
       });
 
-      const token = localStorage.getItem('auth_token');
       const response = await fetch(`${API_URL}/api/admin/customers?${queryParams}`, {
-        credentials: 'include',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include', // Send cookies automatically
       });
       
       if (response.ok) {

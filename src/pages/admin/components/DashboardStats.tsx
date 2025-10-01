@@ -35,10 +35,9 @@ export default function DashboardStats() {
       setLoading(true);
       
       // Fetch dashboard overview data
-      const token = localStorage.getItem('auth_token');
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
       const dashboardResponse = await fetch(`${API_URL}/api/dashboard/overview`, {
-        credentials: 'include',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include', // Send cookies automatically
       });
       
       if (dashboardResponse.ok) {

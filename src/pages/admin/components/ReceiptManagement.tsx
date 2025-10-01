@@ -59,10 +59,8 @@ export default function ReceiptManagement() {
 
   const fetchOrdersWithReceipts = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
       const response = await fetch(`${API_URL}/api/admin/orders-with-receipts`, {
-        credentials: 'include',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include', // Send cookies automatically
       });
       const data = await response.json();
       if (data.success) {
@@ -78,12 +76,12 @@ export default function ReceiptManagement() {
   const updatePaymentStatus = async (orderId: string, newStatus: string) => {
     setUpdatingStatus(orderId);
     try {
-      const response = await fetch(`/api/admin/orders/${orderId}/payment-status`, {
+      const response = await fetch(`${API_URL}/api/admin/orders/${orderId}/payment-status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include',
+        credentials: 'include', // Send cookies automatically
         body: JSON.stringify({ paymentStatus: newStatus })
       });
 
@@ -101,7 +99,6 @@ export default function ReceiptManagement() {
           setSelectedOrder({ 
             ...selectedOrder, 
             paymentStatus: newStatus,
-            status: newStatus === 'paid' ? 'processing' : selectedOrder.status
           });
         }
       }

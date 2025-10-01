@@ -27,7 +27,8 @@ export default function PaymentSettings() {
 
   const fetchPaymentSettings = async () => {
     try {
-      const response = await fetch('/api/admin/payment-settings', {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/admin/payment-settings`, {
         credentials: 'include'
       });
       if (response.ok) {
@@ -46,7 +47,8 @@ export default function PaymentSettings() {
     setMessage(null);
     
     try {
-      const response = await fetch('/api/admin/payment-settings', {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/admin/payment-settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +87,8 @@ export default function PaymentSettings() {
       const formData = new FormData();
       formData.append('qr-code', file);
       
-      const response = await fetch('/api/admin/upload-qr', {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/admin/upload-qr`, {
         method: 'POST',
         credentials: 'include',
         body: formData,

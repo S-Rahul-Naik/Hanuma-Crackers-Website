@@ -1,5 +1,6 @@
 const User = require('../models/User');
-const { sendTokenResponse } = require('../utils/sendToken');
+const Session = require('../models/Session');
+const { createSession, clearSession } = require('../middleware/auth');
 const emailService = require('../utils/emailService');
 const crypto = require('crypto');
 
@@ -28,7 +29,26 @@ exports.register = async (req, res, next) => {
       address
     });
 
-    sendTokenResponse(user, 201, res);
+    // Create secure session
+    const session = await createSession(user, req);
+
+    // Set HTTP-only cookie
+    res.cookie('sessionId', session.sessionId, {
+      expires: session.expiresAt,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    res.status(201).json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -77,25 +97,55 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    sendTokenResponse(user, 200, res);
+    // Create secure session
+    const session = await createSession(user, req);
+
+    // Set HTTP-only cookie
+    res.cookie('sessionId', session.sessionId, {
+      expires: session.expiresAt,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Logout user / clear cookie
+// @desc    Logout user / clear session
 // @route   POST /api/auth/logout
 // @access  Private
 exports.logout = async (req, res, next) => {
-  res.cookie('token', 'none', {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true
-  });
+  try {
+    // Clear session from database
+    if (req.cookies.sessionId) {
+      await clearSession(req.cookies.sessionId);
+    }
 
-  res.status(200).json({
-    success: true,
-    message: 'User logged out successfully'
-  });
+    // Clear cookie
+    res.clearCookie('sessionId', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'User logged out successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 // @desc    Get current logged in user
@@ -103,11 +153,19 @@ exports.logout = async (req, res, next) => {
 // @access  Private
 exports.getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
 
     res.status(200).json({
       success: true,
-      user
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        address: user.address,
+        isActive: user.isActive
+      }
     });
   } catch (error) {
     next(error);

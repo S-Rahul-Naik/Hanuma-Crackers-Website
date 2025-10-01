@@ -31,7 +31,8 @@ export default function RevenueAnalytics() {
       setLoading(true);
       
       // Fetch analytics data from backend with cache-busting
-      const response = await fetch(`/api/dashboard/analytics?t=${Date.now()}`, {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/dashboard/analytics?t=${Date.now()}`, {
         credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache',

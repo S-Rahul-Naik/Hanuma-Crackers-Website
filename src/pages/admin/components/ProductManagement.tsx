@@ -39,11 +39,9 @@ export default function ProductManagement() {
 
   useEffect(() => {
     const controller = new AbortController();
-  const token = localStorage.getItem('auth_token');
   fetch(`${API_URL}/api/products?limit=100`, {
     credentials: 'include',
     signal: controller.signal,
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
       .then(res => res.json())
       .then(data => {
@@ -122,12 +120,10 @@ export default function ProductManagement() {
       productData.imagePublicId = formData.imagePublicId;
     }
     // Persist to backend
-    const token = localStorage.getItem('auth_token');
     await fetch(`${API_URL}/api/products`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
       },
       credentials: 'include',
       body: JSON.stringify(productData)
@@ -135,7 +131,6 @@ export default function ProductManagement() {
     // Refresh products from backend
     fetch(`${API_URL}/api/products`, {
       credentials: 'include',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then(res => res.json())
       .then(data => {
@@ -161,11 +156,9 @@ export default function ProductManagement() {
     if (!confirm('Are you sure you want to delete this product?')) return;
     try {
       setDeletingId(id);
-      const token = localStorage.getItem('auth_token');
       const res = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'DELETE',
         credentials: 'include',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success !== false) {
@@ -197,11 +190,10 @@ export default function ProductManagement() {
     try {
       const formDataUpload = new FormData();
       formDataUpload.append('image', file);
-      const token = localStorage.getItem('auth_token');
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formDataUpload,
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include',
       });
       const data = await res.json();
       if (data.success) {

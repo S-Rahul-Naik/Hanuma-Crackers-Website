@@ -70,11 +70,9 @@ export default function CouponManagement() {
 
   const fetchCoupons = async () => {
     try {
-  const token = localStorage.getItem('auth_token');
-  const response = await fetch(`${API_URL}/api/admin/coupons`, {
-    credentials: 'include',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+      const response = await fetch(`${API_URL}/api/admin/coupons`, {
+        credentials: 'include', // Send cookies automatically
+      });
       const data = await response.json();
       if (data.success) {
         setCoupons(data.coupons);
@@ -88,7 +86,9 @@ export default function CouponManagement() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/products');
+      const response = await fetch(`${API_URL}/api/products`, {
+        credentials: 'include', // Send cookies automatically
+      });
       const data = await response.json();
       if (data.success) {
         setProducts(data.products);
@@ -159,11 +159,10 @@ export default function CouponManagement() {
     if (!confirm('Are you sure you want to delete this coupon?')) return;
 
     try {
-      const response = await fetch(`/api/admin/coupons/${couponId}`, {
+      const response = await fetch(`${API_URL}/api/admin/coupons/${couponId}`, {
         method: 'DELETE',
-        credentials: 'include'
+        credentials: 'include', // Send cookies automatically
       });
-
       const data = await response.json();
       if (data.success) {
         await fetchCoupons();

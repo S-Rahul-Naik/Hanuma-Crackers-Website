@@ -27,9 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
-      const token = localStorage.getItem('auth_token');
       const res = await fetch(`${API_URL}/api/auth/me`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include', // Send cookies automatically
       });
       if (res.ok) {
         const data = await res.json();

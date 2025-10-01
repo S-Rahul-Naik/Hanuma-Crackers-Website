@@ -88,10 +88,8 @@ export default function CheckoutPage() {
   const fetchPaymentSettings = async () => {
     try {
       const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
-      const token = localStorage.getItem('auth_token');
       const response = await fetch(`${API_URL}/api/admin/payment-settings`, {
-        credentials: 'include',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include', // Send cookies automatically
       });
       if (response.ok) {
         const data = await response.json();
@@ -205,14 +203,12 @@ export default function CheckoutPage() {
       const totalPrice = finalItemsPrice + taxPrice + shippingPrice;
 
       const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
-      const token = localStorage.getItem('auth_token');
       const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          'Content-Type': 'application/json'
         },
-        credentials: 'include',
+        credentials: 'include', // Send cookies automatically
         body: JSON.stringify({
           items,
           shippingAddress: shipping,
@@ -295,9 +291,10 @@ export default function CheckoutPage() {
       formData.append('orderId', orderId);
       formData.append('orderNumber', orderNumber);
 
-      const response = await fetch('/api/orders/upload-receipt', {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/orders/upload-receipt`, {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'include', // Send cookies automatically
         body: formData,
       });
 
