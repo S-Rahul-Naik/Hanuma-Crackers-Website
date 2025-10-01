@@ -208,8 +208,8 @@ exports.getOrders = async (req, res) => {
   try {
     const { page = 1, limit = 20, status, paymentStatus } = req.query;
     
-    // Build filter query
-    let filterQuery = {};
+    // Build filter query - exclude draft orders
+    let filterQuery = { status: { $ne: 'draft' } }; // Exclude draft orders
     if (status && status !== 'all') {
       filterQuery.status = status;
     }
@@ -254,19 +254,28 @@ exports.getOrders = async (req, res) => {
     // Get total count for pagination
     const totalOrders = await Order.countDocuments(filterQuery);
     
-    // Calculate order statistics
-    const totalOrdersCount = await Order.countDocuments();
+    // Calculate order statistics - exclude draft orders
+    const totalOrdersCount = await Order.countDocuments({ status: { $ne: 'draft' } });
     const pendingOrders = await Order.countDocuments({ status: 'pending' });
     const processingOrders = await Order.countDocuments({ status: 'processing' });
     const shippedOrders = await Order.countDocuments({ status: 'shipped' });
     const deliveredOrders = await Order.countDocuments({ status: 'delivered' });
     const cancelledOrders = await Order.countDocuments({ status: 'cancelled' });
     
-    const paidOrders = await Order.countDocuments({ paymentStatus: 'paid' });
-    const pendingPayments = await Order.countDocuments({ paymentStatus: 'pending' });
+    const paidOrders = await Order.countDocuments({ 
+      paymentStatus: 'paid',
+      status: { $ne: 'draft' } // Exclude draft orders from paid count
+    });
+    const pendingPayments = await Order.countDocuments({ 
+      paymentStatus: 'pending',
+      status: { $ne: 'draft' } // Exclude draft orders from pending count
+    });
     
     const totalRevenue = await Order.aggregate([
-      { $match: { paymentStatus: 'paid' } },
+      { $match: { 
+        paymentStatus: 'paid',
+        status: { $ne: 'draft' } // Exclude draft orders from revenue
+      }},
       { $group: { _id: null, total: { $sum: '$totalPrice' } } }
     ]);
 

@@ -230,8 +230,7 @@ export default function CheckoutPage() {
         setOrderId(orderData.order._id);
         setOrderNumber(orderData.order.orderNumber);
         
-        // Dispatch custom event to refresh dashboard order count
-        window.dispatchEvent(new CustomEvent('orderPlaced'));
+        // Note: Don't dispatch orderPlaced event here - only after confirmation
       } else {
         throw new Error(orderData.message || 'Failed to create order');
       }
@@ -316,10 +315,16 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (response.ok && data.success) {
+        // Confirm the draft order when receipt is uploaded successfully
+        await confirmOrder();
+        
         setStep('confirmation');
         
         // Dispatch event as payment is being verified (affects total spent calculation)
         window.dispatchEvent(new CustomEvent('paymentStatusUpdated'));
+        
+        // Dispatch custom event to refresh dashboard order count
+        window.dispatchEvent(new CustomEvent('orderPlaced'));
       } else {
         throw new Error(data.message || 'Failed to upload receipt');
       }
@@ -327,6 +332,22 @@ export default function CheckoutPage() {
       setOrderError(error.message || 'Failed to upload payment receipt');
     } finally {
       setUploadingReceipt(false);
+    }
+  };
+
+  const confirmOrder = async () => {
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      await fetch(`${API_URL}/api/orders/${orderId}/confirm`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error confirming order:', error);
+      // Don't throw error here as the receipt was uploaded successfully
     }
   };
 

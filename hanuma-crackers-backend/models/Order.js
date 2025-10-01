@@ -112,8 +112,8 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'payment_verification', 'processing', 'packed', 'shipped', 'delivered', 'cancelled'],
-    default: 'pending'
+    enum: ['draft', 'pending', 'payment_verification', 'processing', 'packed', 'shipped', 'delivered', 'cancelled'],
+    default: 'draft'
   },
   trackingNumber: String,
   estimatedDeliveryDate: Date,

@@ -11,7 +11,8 @@ const {
   getRefundRequests,
   processRefund,
   getOrderStats,
-  uploadPaymentReceipt
+  uploadPaymentReceipt,
+  confirmOrder
 } = require('../controllers/orderController');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -39,6 +40,7 @@ router.post('/', protect, createOrder);
 router.get('/myorders', protect, getMyOrders);
 router.put('/:id/cancel', protect, cancelOrder);
 router.put('/:id/refund', protect, requestRefund);
+router.put('/:id/confirm', protect, confirmOrder);
 router.post('/upload-receipt', protect, upload.single('receipt'), uploadPaymentReceipt);
 
 // Admin only routes (specific routes first)

@@ -105,7 +105,11 @@ exports.createOrder = async (req, res, next) => {
 // @access  Private
 exports.getMyOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ user: req.user._id })
+    // Exclude draft orders from user dashboard
+    const orders = await Order.find({ 
+      user: req.user._id,
+      status: { $ne: 'draft' } // Exclude draft orders
+    })
       .populate('items.product', 'name price images')
       .sort('-createdAt');
 
@@ -307,8 +311,10 @@ exports.getOrders = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const startIndex = (page - 1) * limit;
 
-    const total = await Order.countDocuments();
-    const orders = await Order.find()
+    // Exclude draft orders from admin view
+    const filterQuery = { status: { $ne: 'draft' } };
+    const total = await Order.countDocuments(filterQuery);
+    const orders = await Order.find(filterQuery)
       .populate('user', 'name email phone')
       .populate('items.product', 'name price')
       .sort('-createdAt')
@@ -380,16 +386,19 @@ exports.updateOrderStatus = async (req, res, next) => {
 // @access  Private/Admin
 exports.getOrderStats = async (req, res, next) => {
   try {
-    const totalOrders = await Order.countDocuments();
+    // Exclude draft orders from all statistics
+    const totalOrders = await Order.countDocuments({ status: { $ne: 'draft' } });
     const pendingOrders = await Order.countDocuments({ status: 'pending' });
     const processingOrders = await Order.countDocuments({ status: 'processing' });
     const shippedOrders = await Order.countDocuments({ status: 'shipped' });
     const deliveredOrders = await Order.countDocuments({ status: 'delivered' });
     const cancelledOrders = await Order.countDocuments({ status: 'cancelled' });
 
-    // Revenue calculation
+    // Revenue calculation - exclude draft and cancelled orders
     const revenueStats = await Order.aggregate([
-      { $match: { status: { $ne: 'cancelled' } } },
+      { $match: { 
+        status: { $nin: ['cancelled', 'draft'] } 
+      }},
       {
         $group: {
           _id: null,
@@ -399,11 +408,11 @@ exports.getOrderStats = async (req, res, next) => {
       }
     ]);
 
-    // Monthly revenue
+    // Monthly revenue - exclude draft and cancelled orders
     const monthlyRevenue = await Order.aggregate([
       {
         $match: {
-          status: { $ne: 'cancelled' },
+          status: { $nin: ['cancelled', 'draft'] },
           createdAt: { $gte: new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000) }
         }
       },
@@ -515,6 +524,50 @@ exports.uploadPaymentReceipt = async (req, res, next) => {
         paymentStatus: order.paymentStatus,
         status: order.status
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Confirm draft order (make it visible in dashboards)
+// @route   PUT /api/orders/:id/confirm
+// @access  Private
+exports.confirmOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Make sure user owns order
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized to confirm this order'
+      });
+    }
+
+    // Only confirm draft orders
+    if (order.status !== 'draft') {
+      return res.status(400).json({
+        success: false,
+        message: 'Order is already confirmed'
+      });
+    }
+
+    // Update status from draft to pending
+    order.status = 'pending';
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Order confirmed successfully',
+      order
     });
   } catch (error) {
     next(error);
