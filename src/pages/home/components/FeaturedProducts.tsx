@@ -140,6 +140,8 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
             description: p.description || '',
             price: p.price,
             originalPrice: p.originalPrice || p.price,
+            discountPercentage: p.discountPercentage || (p.originalPrice && p.originalPrice > p.price ? 
+              Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0),
             discount: p.originalPrice && p.originalPrice > p.price ? 
               Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0,
             image: p.images && p.images.length > 0 ? p.images[0].url : 'https://via.placeholder.com/400x300?text=No+Image',
@@ -511,36 +513,36 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" data-product-shop="true">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4" data-product-shop="true">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group relative border border-yellow-200">
+            <div key={product.id} className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group relative border border-yellow-200">
               {(product.bestseller || product.combo) && (
-                <div className="absolute top-3 left-3 z-10">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                <div className="absolute top-2 left-2 z-10">
+                  <span className={`px-2 py-1 rounded-full text-xs font-bold text-white ${
                     product.bestseller 
                       ? 'bg-gradient-to-r from-red-500 to-orange-500' 
                       : 'bg-gradient-to-r from-purple-600 to-indigo-600'
                   }`}>
-                    {product.bestseller ? 'Bestseller' : 'Festive Combo'}
+                    {product.bestseller ? 'Best' : 'Combo'}
                   </span>
                 </div>
               )}
 
               {/* Wishlist Heart Icon */}
-              <div className="absolute top-3 right-3 z-10">
+              <div className="absolute top-2 right-2 z-10">
                 <button
                   onClick={() => toggleWishlist(product.id, product.name)}
                   disabled={wishlistLoading.has(product.id)}
-                  className={`w-10 h-10 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${
+                  className={`w-6 h-6 md:w-8 md:h-8 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${
                     wishlistItems.has(product.id)
                       ? 'bg-red-500 text-white hover:bg-red-600'
                       : 'bg-white text-gray-400 hover:text-red-500 hover:bg-red-50'
                   } ${wishlistLoading.has(product.id) ? 'animate-pulse' : ''}`}
                 >
                   {wishlistLoading.has(product.id) ? (
-                    <i className="ri-loader-4-line animate-spin text-lg"></i>
+                    <i className="ri-loader-4-line animate-spin text-xs md:text-sm"></i>
                   ) : (
-                    <i className={`text-lg ${
+                    <i className={`text-xs md:text-sm ${
                       wishlistItems.has(product.id) ? 'ri-heart-fill' : 'ri-heart-line'
                     }`}></i>
                   )}
@@ -548,52 +550,66 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
               </div>
 
               {getCartQuantity(product.id) > 0 && (
-                <div className="absolute top-16 right-3 z-10">
-                  <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                    {getCartQuantity(product.id)} in cart
+                <div className="absolute top-8 right-2 z-10">
+                  <span className="bg-green-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold">
+                    {getCartQuantity(product.id)}
                   </span>
                 </div>
               )}
 
-              <div className="relative overflow-hidden h-48">
+              <div className="relative overflow-hidden h-32 md:h-36">
                 <img 
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   src={product.image}
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-orange-400/20 to-red-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
 
-              <div className="p-5">
-                <div className="text-sm text-purple-600 font-medium mb-1">{product.category}</div>
-                <h3 className="font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300">
+              <div className="p-2 md:p-3">
+                <div className="mb-1">
+                  <span className="text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full font-medium">
+                    {product.category}
+                  </span>
+                </div>
+                <h3 className="font-semibold text-gray-800 mb-1 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300 text-xs md:text-sm">
                   {product.name}
                 </h3>
                 
                 {/* Product Description */}
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                  {product.description || 'Premium quality cracker for your celebrations'}
+                <p className="text-xs text-gray-600 mb-2 line-clamp-1 leading-relaxed">
+                  {product.description || 'Premium quality cracker'}
                 </p>
                 
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
-                  <span className="text-sm text-gray-500 line-through">₹{(product.price * 1.15).toFixed(2)}</span>
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                    {product.discount === 0 ? '15% OFF' : `${product.discount}% OFF`}
-                  </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-1">
+                    <span className="text-sm md:text-base font-bold text-green-600">₹{product.price}</span>
+                    {product.originalPrice && product.originalPrice > product.price && (
+                      <span className="text-xs text-gray-500 line-through">₹{product.originalPrice}</span>
+                    )}
+                  </div>
+                  {product.originalPrice && product.originalPrice > product.price && (
+                    <span className="text-xs text-green-600 font-medium">
+                      {product.discountPercentage || Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                    </span>
+                  )}
                 </div>
                 <button 
                   onClick={() => addToCart(product.id, product.name)}
-                  className={`font-semibold rounded-lg transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-lg hover:shadow-xl px-4 py-2 text-sm w-full ${
+                  className={`font-medium rounded-md transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg py-1.5 md:py-2 text-xs md:text-sm w-full ${
                     getCartQuantity(product.id) > 0
                       ? 'bg-green-500 text-white hover:bg-green-600'
                       : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600'
                   }`}
                 >
-                  <i className={`${getCartQuantity(product.id) > 0 ? 'ri-check-line' : 'ri-shopping-cart-line'} mr-2`}></i>
-                  {getCartQuantity(product.id) > 0 ? `Added (${getCartQuantity(product.id)})` : 'Add to Cart'}
+                  <i className={`${getCartQuantity(product.id) > 0 ? 'ri-check-line' : 'ri-shopping-cart-line'} mr-1`}></i>
+                  <span className="hidden md:inline">
+                    {getCartQuantity(product.id) > 0 ? `Added (${getCartQuantity(product.id)})` : 'Add to Cart'}
+                  </span>
+                  <span className="md:hidden">
+                    {getCartQuantity(product.id) > 0 ? `${getCartQuantity(product.id)}` : 'Add'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -601,18 +617,19 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
         </div>
 
         {loading && products.length === 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl-grid-cols-4 gap-8 mt-8">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-lg border border-yellow-100 overflow-hidden animate-pulse">
-                <div className="h-48 bg-gradient-to-r from-orange-100 to-red-100" />
-                <div className="p-5 space-y-3">
-                  <div className="h-4 bg-gray-200 rounded w-1/3" />
-                  <div className="h-5 bg-gray-200 rounded w-3/4" />
-                  <div className="flex gap-2 items-center">
-                    <div className="h-6 bg-gray-200 rounded w-16" />
-                    <div className="h-6 bg-gray-200 rounded w-10" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 mt-8">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-lg border border-yellow-100 overflow-hidden animate-pulse">
+                <div className="h-32 md:h-36 bg-gradient-to-r from-orange-100 to-red-100" />
+                <div className="p-2 md:p-3 space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-full" />
+                  <div className="flex gap-1 items-center">
+                    <div className="h-4 bg-gray-200 rounded w-12" />
+                    <div className="h-4 bg-gray-200 rounded w-8" />
                   </div>
-                  <div className="h-9 bg-gray-200 rounded w-full mt-4" />
+                  <div className="h-6 bg-gray-200 rounded w-full mt-2" />
                 </div>
               </div>
             ))}
