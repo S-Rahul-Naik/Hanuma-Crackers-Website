@@ -204,13 +204,16 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
 
   const handleOrderAction = async (orderId: string, action: string, reason?: string, comment?: string) => {
     try {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const url = `${API_URL}/api/orders/${orderId}/${action}`;
+      
       console.log('Making API call:', {
-        url: `/api/orders/${orderId}/${action}`,
+        url: url,
         method: 'PUT',
         data: { reason, comment }
       });
 
-      const response = await fetch(`/api/orders/${orderId}/${action}`, {
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
