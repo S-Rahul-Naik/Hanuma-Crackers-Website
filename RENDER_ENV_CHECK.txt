@@ -1,0 +1,20 @@
+🚨 CRITICAL RENDER ENVIRONMENT VARIABLES CHECKLIST
+
+Go to your Render dashboard → Your backend service → Environment
+
+MUST HAVE THESE EXACT VARIABLES:
+
+✅ NODE_ENV=production
+✅ MONGODB_URI=mongodb+srv://hanumacrackers_db_user:SIV1cILwZxvNrCry@hanuma.n4dzger.mongodb.net/hanuma-crackers?retryWrites=true&w=majority&appName=Hanuma
+✅ JWT_SECRET=hanuma-crackers-super-secure-jwt-secret-key-2024-production-version-32-chars-minimum
+✅ JWT_EXPIRE=3000d
+✅ CORS_ORIGINS=https://hanuma-crackers.netlify.app
+
+ALSO ADD THESE:
+✅ ADMIN_EMAIL=admin@hanuma.com
+✅ ADMIN_PASSWORD=HanumaCrackers@2024!
+✅ CLOUDINARY_CLOUD_NAME=dongekzob
+✅ CLOUDINARY_API_KEY=984123595296894
+✅ CLOUDINARY_API_SECRET=LxL83YzQeC9SyvVWAvFGf88ka8c
+
+After adding these, click "Deploy" to restart the service!
