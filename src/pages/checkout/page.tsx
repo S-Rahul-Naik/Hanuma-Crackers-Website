@@ -121,7 +121,8 @@ export default function CheckoutPage() {
         quantity: item.quantity
       }));
 
-      const response = await fetch('/api/coupons/validate', {
+      const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/coupons/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +238,8 @@ export default function CheckoutPage() {
       // Mark coupon as used if applied
       if (appliedCoupon) {
         try {
-          await fetch('/api/coupons/use', {
+          const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
+          await fetch(`${API_URL}/api/coupons/use`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
