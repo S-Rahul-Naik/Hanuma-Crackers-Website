@@ -56,7 +56,7 @@ exports.protect = async (req, res, next) => {
       res.clearCookie('sessionId', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
       });
       return res.status(401).json({
         success: false,
@@ -70,7 +70,7 @@ exports.protect = async (req, res, next) => {
       res.clearCookie('sessionId', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
       });
       return res.status(401).json({
         success: false,

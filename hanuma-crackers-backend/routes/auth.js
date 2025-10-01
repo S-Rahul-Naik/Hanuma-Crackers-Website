@@ -16,6 +16,22 @@ const { handleValidationErrors } = require('../middleware/error');
 
 const router = express.Router();
 
+// Temporary debug route for testing
+router.get('/debug', (req, res) => {
+  res.json({
+    success: true,
+    debug: {
+      cookies: req.cookies || {},
+      sessionId: req.cookies?.sessionId || 'No session cookie',
+      origin: req.headers.origin,
+      userAgent: req.headers['user-agent'],
+      environment: process.env.NODE_ENV,
+      corsOrigins: process.env.CORS_ORIGINS,
+      timestamp: new Date().toISOString()
+    }
+  });
+});
+
 // Validation rules
 const registerValidation = [
   body('name')
@@ -52,6 +68,56 @@ const updatePasswordValidation = [
     .isLength({ min: 6 })
     .withMessage('New password must be at least 6 characters long')
 ];
+
+// Temporary test login route
+router.post('/test-login', async (req, res) => {
+  try {
+    const { createSession } = require('../middleware/auth');
+    const User = require('../models/User');
+    
+    // Find admin user
+    const user = await User.findOne({ email: 'admin@hanuma.com' });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin user not found'
+      });
+    }
+
+    // Create session
+    const session = await createSession(user, req);
+
+    // Set cookie
+    res.cookie('sessionId', session.sessionId, {
+      expires: session.expiresAt,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    });
+
+    res.json({
+      success: true,
+      message: 'Test session created',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      },
+      sessionInfo: {
+        sessionId: session.sessionId,
+        expiresAt: session.expiresAt,
+        environment: process.env.NODE_ENV
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Test login failed',
+      error: error.message
+    });
+  }
+});
 
 // Routes
 router.post('/register', registerValidation, handleValidationErrors, register);
