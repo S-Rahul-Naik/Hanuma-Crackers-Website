@@ -13,6 +13,7 @@ const staticProducts = [
     price: 299,
     originalPrice: 399,
     discount: 25,
+    stock: 15,
     image: 'https://readdy.ai/api/search-image?query=Beautiful%20golden%20sparklers%20fireworks%20crackers%20pack%20with%20elegant%20packaging%2C%20premium%20quality%20sparklers%20in%20decorative%20box%2C%20festive%20Diwali%20themed%20design%20with%20golden%20sparkles%20effect%2C%20product%20photography%20with%20simple%20clean%20background%20highlighting%20the%20sparklers%2C%20warm%20golden%20lighting%20creating%20celebratory%20mood&width=400&height=300&seq=sparklers-001&orientation=landscape',
     bestseller: true
   },
@@ -24,6 +25,7 @@ const staticProducts = [
     price: 599,
     originalPrice: 799,
     discount: 25,
+    stock: 0, // Out of stock for testing
     image: 'https://readdy.ai/api/search-image?query=Professional%20thunder%20bomb%20crackers%20fireworks%20set%20in%20colorful%20packaging%2C%20powerful%20crackers%20with%20safety%20warnings%2C%20festive%20Diwali%20themed%20product%20display%2C%20vibrant%20red%20and%20orange%20colored%20packaging%20design%2C%20clean%20product%20photography%20with%20simple%20background%20emphasizing%20the%20crackers%20quality&width=400&height=300&seq=bombs-001&orientation=landscape',
     bestseller: true
   },
@@ -35,6 +37,7 @@ const staticProducts = [
     price: 899,
     originalPrice: 1199,
     discount: 25,
+    stock: 8,
     image: 'https://readdy.ai/api/search-image?query=Spectacular%20sky%20rocket%20fireworks%20bundle%20with%20colorful%20rockets%2C%20professional%20grade%20fireworks%20in%20premium%20packaging%2C%20festive%20Diwali%20celebration%20theme%2C%20multiple%20colored%20rockets%20arranged%20beautifully%2C%20clean%20product%20photography%20with%20simple%20background%20showcasing%20the%20rocket%20variety%20and%20quality&width=400&height=300&seq=rockets-001&orientation=landscape'
   },
   {
@@ -45,6 +48,7 @@ const staticProducts = [
     price: 1499,
     originalPrice: 2199,
     discount: 32,
+    stock: 5,
     image: 'https://readdy.ai/api/search-image?query=Luxury%20festival%20combo%20pack%20with%20assorted%20crackers%20and%20fireworks%2C%20premium%20deluxe%20packaging%20with%20golden%20accents%2C%20variety%20of%20crackers%20including%20sparklers%20bombs%20rockets%20in%20elegant%20gift%20box%2C%20festive%20Diwali%20themed%20presentation%2C%20clean%20product%20photography%20with%20simple%20background%20highlighting%20the%20comprehensive%20collection&width=400&height=300&seq=combo-001&orientation=landscape',
     combo: true
   },
@@ -56,6 +60,7 @@ const staticProducts = [
     price: 249,
     originalPrice: 349,
     discount: 29,
+    stock: 12,
     image: 'https://readdy.ai/api/search-image?query=Child-safe%20fireworks%20kit%20with%20colorful%20mild%20crackers%2C%20kids%20special%20safe%20fireworks%20in%20bright%20cheerful%20packaging%2C%20family-friendly%20Diwali%20celebration%20theme%2C%20small%20safe%20crackers%20designed%20for%20children%2C%20clean%20product%20photography%20with%20simple%20background%20emphasizing%20safety%20and%20fun%20colors&width=400&height=300&seq=kids-001&orientation=landscape'
   },
   {
@@ -66,6 +71,7 @@ const staticProducts = [
     price: 449,
     originalPrice: 599,
     discount: 25,
+    stock: 20,
     image: 'https://readdy.ai/api/search-image?query=Vibrant%20rainbow%20colored%20sparklers%20collection%2C%20multi-colored%20sparklers%20in%20beautiful%20display%20packaging%2C%20festive%20Diwali%20celebration%20with%20rainbow%20theme%2C%20colorful%20sparklers%20arranged%20in%20spectrum%20colors%2C%20clean%20product%20photography%20with%20simple%20background%20showcasing%20the%20rainbow%20sparkler%20variety%20and%20premium%20quality&width=400&height=300&seq=rainbow-001&orientation=landscape'
   },
   {
@@ -76,6 +82,7 @@ const staticProducts = [
     price: 199,
     originalPrice: 299,
     discount: 33,
+    stock: 25,
     image: 'https://readdy.ai/api/search-image?query=Exciting%20ground%20spinner%20wheel%20fireworks%20set%2C%20rotating%20wheel%20crackers%20with%20colorful%20effects%2C%20traditional%20Diwali%20ground%20fireworks%20in%20attractive%20packaging%2C%20spinning%20wheel%20crackers%20arrangement%2C%20clean%20product%20photography%20with%20simple%20background%20highlighting%20the%20wheel%20fireworks%20and%20their%20spinning%20motion%20effects&width=400&height=300&seq=spinner-001&orientation=landscape'
   },
   {
@@ -86,6 +93,7 @@ const staticProducts = [
     price: 2499,
     originalPrice: 3499,
     discount: 29,
+    stock: 3,
     image: 'https://readdy.ai/api/search-image?query=Ultimate%20mega%20celebration%20fireworks%20bundle%2C%20comprehensive%20collection%20of%20premium%20crackers%20and%20fireworks%2C%20luxury%20packaging%20with%20festival%20themes%2C%20extensive%20variety%20including%20all%20types%20of%20crackers%2C%20clean%20product%20photography%20with%20simple%20background%20showcasing%20the%20complete%20mega%20collection%20for%20grand%20Diwali%20celebrations&width=400&height=300&seq=mega-001&orientation=landscape',
     bestseller: true
   }
@@ -140,6 +148,7 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
             description: p.description || '',
             price: p.price,
             originalPrice: p.originalPrice || p.price,
+            stock: p.stock || 0, // Add stock information
             discountPercentage: p.discountPercentage || (p.originalPrice && p.originalPrice > p.price ? 
               Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0),
             discount: p.originalPrice && p.originalPrice > p.price ? 
@@ -325,15 +334,38 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
       }
     });
 
-    const addToCart = (productId: string, productName: string) => { // Function to add product to cart
-    onAddToCart(productId, productName); // parent ignores productName currently
-    
-    // Show notification
-    setShowNotification({show: true, productName});
-    setTimeout(() => {
-      setShowNotification({show: false, productName: ''});
-    }, 2000);
-  };
+    const addToCart = (productId: string, productName: string) => {
+      // Find the product to check stock
+      const product = filteredProducts.find(p => p.id === productId);
+      
+      // Check if product exists and is in stock
+      if (!product || product.stock <= 0) {
+        setShowNotification({show: true, productName: `${productName} is out of stock!`});
+        setTimeout(() => {
+          setShowNotification({show: false, productName: ''});
+        }, 2000);
+        return;
+      }
+      
+      // Check if adding one more would exceed stock
+      const currentQuantity = getCartQuantity(productId);
+      if (currentQuantity >= product.stock) {
+        setShowNotification({show: true, productName: `Only ${product.stock} ${productName} available!`});
+        setTimeout(() => {
+          setShowNotification({show: false, productName: ''});
+        }, 2000);
+        return;
+      }
+      
+      // Add to cart if stock is available
+      onAddToCart(productId, productName);
+      
+      // Show success notification
+      setShowNotification({show: true, productName: `${productName} added to cart!`});
+      setTimeout(() => {
+        setShowNotification({show: false, productName: ''});
+      }, 2000);
+    };
 
   const getCartQuantity = (productId: string) => cart[productId] || 0;
 
@@ -346,10 +378,18 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
       <div className="container mx-auto px-4">
         {/* Cart Notification */}
         {showNotification.show && (
-          <div className="fixed top-20 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce">
+          <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg animate-bounce ${
+            showNotification.productName.includes('out of stock') || showNotification.productName.includes('available')
+              ? 'bg-red-500 text-white'
+              : 'bg-green-500 text-white'
+          }`}>
             <div className="flex items-center space-x-2">
-              <i className="ri-check-line text-xl"></i>
-              <span className="font-medium">{showNotification.productName} added to cart!</span>
+              <i className={`text-xl ${
+                showNotification.productName.includes('out of stock') || showNotification.productName.includes('available')
+                  ? 'ri-error-warning-line'
+                  : 'ri-check-line'
+              }`}></i>
+              <span className="font-medium">{showNotification.productName}</span>
             </div>
           </div>
         )}
@@ -528,6 +568,15 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
                 </div>
               )}
 
+              {/* Out of Stock Badge */}
+              {product.stock <= 0 && (
+                <div className="absolute top-2 left-2 z-20">
+                  <span className="px-2 py-1 rounded-full text-xs font-bold text-white bg-red-600">
+                    Out of Stock
+                  </span>
+                </div>
+              )}
+
               {/* Wishlist Heart Icon */}
               <div className="absolute top-2 right-2 z-10">
                 <button
@@ -596,19 +645,38 @@ export default function FeaturedProducts({ cart, onAddToCart, onUpdateQuantity: 
                   )}
                 </div>
                 <button 
-                  onClick={() => addToCart(product.id, product.name)}
+                  onClick={() => product.stock > 0 ? addToCart(product.id, product.name) : null}
+                  disabled={product.stock <= 0}
                   className={`font-medium rounded-md transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center shadow-md hover:shadow-lg py-1.5 md:py-2 text-xs md:text-sm w-full ${
-                    getCartQuantity(product.id) > 0
-                      ? 'bg-green-500 text-white hover:bg-green-600'
-                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600'
+                    product.stock <= 0
+                      ? 'bg-gray-400 text-gray-700 cursor-not-allowed opacity-60'
+                      : getCartQuantity(product.id) > 0
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600'
                   }`}
                 >
-                  <i className={`${getCartQuantity(product.id) > 0 ? 'ri-check-line' : 'ri-shopping-cart-line'} mr-1`}></i>
+                  <i className={`${
+                    product.stock <= 0 
+                      ? 'ri-close-line' 
+                      : getCartQuantity(product.id) > 0 
+                        ? 'ri-check-line' 
+                        : 'ri-shopping-cart-line'
+                  } mr-1`}></i>
                   <span className="hidden md:inline">
-                    {getCartQuantity(product.id) > 0 ? `Added (${getCartQuantity(product.id)})` : 'Add to Cart'}
+                    {product.stock <= 0 
+                      ? 'Out of Stock'
+                      : getCartQuantity(product.id) > 0 
+                        ? `Added (${getCartQuantity(product.id)})` 
+                        : 'Add to Cart'
+                    }
                   </span>
                   <span className="md:hidden">
-                    {getCartQuantity(product.id) > 0 ? `${getCartQuantity(product.id)}` : 'Add'}
+                    {product.stock <= 0 
+                      ? 'Out'
+                      : getCartQuantity(product.id) > 0 
+                        ? `${getCartQuantity(product.id)}` 
+                        : 'Add'
+                    }
                   </span>
                 </button>
               </div>
