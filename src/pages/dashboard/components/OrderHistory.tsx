@@ -1,7 +1,9 @@
 
+
 import { useState, useEffect } from 'react';
-const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
 import jsPDF from 'jspdf';
+
+const API_URL = process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL;
 
 interface OrderItem {
   product: string;
@@ -11,9 +13,9 @@ interface OrderItem {
   image?: string;
 }
 
-      console.log('Fetching orders from:', `${API_URL}/api/orders/myorders`);
+interface Order {
   _id: string;
-      const response = await fetch(`${API_URL}/api/orders/myorders`, {
+  orderNumber: string;
   createdAt: string;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'failed';
