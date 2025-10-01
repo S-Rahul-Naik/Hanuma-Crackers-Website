@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "seed": "node scripts/seedData.js",
     "seed:prod": "NODE_ENV=production node scripts/seedData.js",
+    "reset:production": "node reset-production.js",
     "test": "jest --detectOpenHandles --forceExit",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .js",

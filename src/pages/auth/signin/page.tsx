@@ -144,13 +144,13 @@ export default function SignIn() {
           </form>
 
           {/* Demo Accounts */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          {/* <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <p className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</p>
             <div className="space-y-1 text-xs text-gray-600">
               <p><strong>Admin:</strong> admin@hanuma.com / (your configured admin password)</p>
               <p><strong>User:</strong> Register a new account via Sign Up</p>
             </div>
-          </div>
+          </div> */}
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">

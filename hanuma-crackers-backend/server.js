@@ -82,17 +82,7 @@ const limiter = rateLimit({
   }
 });
 
-// Separate, more lenient rate limiter for auth endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // 20 login attempts per 15 minutes per IP
-  message: {
-    success: false,
-    message: 'Too many login attempts, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
+// Auth rate limiter PERMANENTLY DISABLED for unlimited login attempts
 
 // Apply rate limiting
 if (process.env.NODE_ENV === 'production') {
@@ -151,7 +141,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authLimiter, auth); // Apply specific auth rate limiting
+app.use('/api/auth', auth); // Rate limiting removed permanently
 app.use('/api/products', products);
 app.use('/api/orders', orders);
 app.use('/api/users', users);
