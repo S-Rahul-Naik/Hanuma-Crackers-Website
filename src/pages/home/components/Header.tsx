@@ -72,11 +72,6 @@ export default function Header({ cartItems, onCartClick }: HeaderProps) {
 
           {/* Right Side Icons */}
           <div className="flex items-center space-x-4">
-            {/* Search */}
-            <div className="relative cursor-pointer hover:scale-110 transition-transform duration-300">
-              <i className="ri-search-line text-2xl"></i>
-            </div>
-
             {/* User Account / Dropdown */}
             <div className="relative flex items-center">
               <div

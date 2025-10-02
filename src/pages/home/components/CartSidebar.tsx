@@ -54,6 +54,15 @@ export default function CartSidebar({
     return Object.values(cartItems).reduce((total, quantity) => total + quantity, 0);
   };
 
+  const getShippingCost = () => {
+    const total = getTotalPrice();
+    return total < 2150 ? 150 : 0;
+  };
+
+  const getFinalTotal = () => {
+    return getTotalPrice() + getShippingCost();
+  };
+
   const handleCheckout = () => {
     if (!user) {
       navigate('/signin');
@@ -81,16 +90,16 @@ export default function CartSidebar({
     <>
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
             <div className="flex items-center space-x-2">
-              <i className="ri-shopping-cart-2-line text-xl"></i>
-              <h2 className="text-xl font-bold">Shopping Cart</h2>
+              <i className="ri-shopping-cart-2-line text-lg sm:text-xl"></i>
+              <h2 className="text-lg sm:text-xl font-bold">Shopping Cart</h2>
               <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
                 {getTotalItems()} items
               </span>
@@ -160,11 +169,19 @@ export default function CartSidebar({
                 </div>
                 <div className="flex justify-between items-center text-sm text-gray-500">
                   <span>Delivery:</span>
-                  <span>Free</span>
+                  <span className={getShippingCost() === 0 ? 'text-green-600 font-medium' : 'text-gray-600'}>
+                    {getShippingCost() === 0 ? 'Free' : `₹${getShippingCost()}`}
+                  </span>
                 </div>
+                {getShippingCost() > 0 && (
+                  <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mt-2">
+                    <i className="ri-information-line mr-1"></i>
+                    Add ₹{2150 - getTotalPrice()} more for free shipping!
+                  </div>
+                )}
                 <div className="border-t pt-2 flex justify-between items-center">
                   <span className="font-bold text-gray-800">Total:</span>
-                  <span className="font-bold text-xl text-green-600">₹{getTotalPrice()}</span>
+                  <span className="font-bold text-xl text-green-600">₹{getTotalPrice() + getShippingCost()}</span>
                 </div>
                 <button
                   onClick={handleCheckout}

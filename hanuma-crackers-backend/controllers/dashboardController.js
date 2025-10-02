@@ -50,7 +50,15 @@ exports.getDashboardOverview = async (req, res, next) => {
           _id: null,
           totalOrders: { 
             $sum: { 
-              $cond: [{ $nin: ['$status', ['cancelled', 'refunded']] }, 1, 0] 
+              $cond: [
+                { 
+                  $not: { 
+                    $in: ['$status', ['cancelled', 'refunded']] 
+                  } 
+                }, 
+                1, 
+                0
+              ] 
             }
           },
           totalSpent: { 

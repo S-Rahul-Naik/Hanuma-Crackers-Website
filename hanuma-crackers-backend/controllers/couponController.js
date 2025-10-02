@@ -257,9 +257,9 @@ exports.validateCoupon = async (req, res) => {
       });
     }
 
-    // Calculate shipping cost (₹150 if total < ₹2000, free otherwise)
+    // Calculate shipping cost (₹150 if total < ₹2150, free otherwise)
     const discountedTotal = originalTotal - totalDiscount;
-    const shippingCost = discountedTotal < 2000 ? 150 : 0;
+    const shippingCost = discountedTotal < 2150 ? 150 : 0;
     const finalTotal = discountedTotal + shippingCost;
 
     res.status(200).json({

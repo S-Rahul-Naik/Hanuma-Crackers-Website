@@ -267,17 +267,28 @@ class EmailService {
     return await this.sendEmail(mailOptions);
   }
 
-  async sendPasswordResetEmail(user, resetToken) {
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+  async sendPasswordResetEmail(userOrData, resetToken = null) {
+    // Handle both old format (user, resetToken) and new format (data object)
+    let userData, resetUrl;
+    
+    if (typeof userOrData === 'object' && userOrData.resetUrl) {
+      // New format: data object with resetUrl
+      userData = userOrData;
+      resetUrl = userOrData.resetUrl;
+    } else {
+      // Old format: user object and separate resetToken
+      userData = userOrData;
+      resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    }
     
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: user.email,
+      to: userData.email,
       subject: 'Password Reset Request - Hanuma Crackers',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #f97316;">Password Reset Request</h2>
-          <p>Hello ${user.name},</p>
+          <p>Hello ${userData.name},</p>
           <p>You recently requested to reset your password for your Hanuma Crackers account.</p>
           
           <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -289,7 +300,7 @@ class EmailService {
             </p>
           </div>
 
-          <p><strong>Important:</strong> This link will expire in 1 hour for security reasons.</p>
+          <p><strong>Important:</strong> This link will expire in 10 minutes for security reasons.</p>
           <p>If you didn't request this password reset, please ignore this email.</p>
           
           <p>Best regards,<br>Hanuma Crackers Team</p>
@@ -300,35 +311,7 @@ class EmailService {
     return await this.sendEmail(mailOptions);
   }
 
-  async sendAdminNotification(subject, message, data = {}) {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
-    
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: adminEmail,
-      subject: `[Admin Alert] ${subject}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #dc2626;">Admin Notification</h2>
-          <h3>${subject}</h3>
-          <p>${message}</p>
-          
-          ${Object.keys(data).length > 0 ? `
-            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h4>Additional Details:</h4>
-              ${Object.entries(data).map(([key, value]) => `
-                <p><strong>${key}:</strong> ${value}</p>
-              `).join('')}
-            </div>
-          ` : ''}
-          
-          <p>This is an automated notification from Hanuma Crackers system.</p>
-        </div>
-      `
-    };
-
-    return await this.sendEmail(mailOptions);
-  }
+  // Old sendAdminNotification method removed - now using enhanced sendContactFormEmails
 
   async sendContactFormEmails(name, email, phone, subject, message) {
     try {
@@ -339,31 +322,74 @@ class EmailService {
       const adminMailOptions = {
         from: process.env.EMAIL_USER,
         to: adminEmail,
-        subject: `New Contact Form Submission: ${subject}`,
+        subject: `🎆 NEW INQUIRY: ${subject} - Action Required`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #f97316;">🔔 New Contact Form Submission</h2>
+          <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto;">
+            <h2 style="color: #f97316; border-bottom: 3px solid #f97316; padding-bottom: 10px;">
+              🔔 NEW CUSTOMER INQUIRY - ACTION REQUIRED
+            </h2>
+            
+            <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f97316;">
+              <h3 style="color: #333; margin-top: 0;">⚡ PRIORITY: Respond within 24 hours</h3>
+              <p style="margin: 0; font-size: 14px;">📅 <strong>Received:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
+            </div>
             
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #333; margin-top: 0;">📋 Customer Details</h3>
-              <p><strong>👤 Full Name:</strong> ${name}</p>
-              <p><strong>📧 Email Address:</strong> <a href="mailto:${email}">${email}</a></p>
-              <p><strong>📱 Phone Number:</strong> <a href="tel:${phone}">${phone}</a></p>
-              <p><strong>📝 Subject:</strong> ${subject}</p>
+              <h3 style="color: #333; margin-top: 0;">� CUSTOMER CONTACT INFORMATION</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold; width: 30%;">Full Name:</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #ddd;">${name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Email:</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #ddd;"><a href="mailto:${email}" style="color: #f97316; text-decoration: none;">${email}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Phone:</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #ddd;"><a href="tel:${phone}" style="color: #f97316; text-decoration: none;">${phone}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; font-weight: bold;">Subject:</td>
+                  <td style="padding: 8px; color: #f97316; font-weight: bold;">${subject}</td>
+                </tr>
+              </table>
             </div>
 
-            <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f97316;">
-              <h3 style="color: #333; margin-top: 0;">💬 Customer Message</h3>
-              <p style="white-space: pre-wrap; line-height: 1.6; background: white; padding: 15px; border-radius: 4px; border: 1px solid #e0e0e0;">${message}</p>
+            <div style="background-color: #fff2e6; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #f97316;">
+              <h3 style="color: #333; margin-top: 0;">💬 CUSTOMER INQUIRY MESSAGE</h3>
+              <div style="background: white; padding: 20px; border-radius: 6px; border: 1px solid #e0e0e0; font-family: 'Courier New', monospace; line-height: 1.6; white-space: pre-wrap; color: #333;">${message}</div>
             </div>
 
-            <div style="background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #333; margin-top: 0;">📞 Quick Actions</h3>
-              <p><strong>📧 Reply by Email:</strong> <a href="mailto:${email}?subject=Re: ${subject}" style="color: #f97316;">Click to Reply</a></p>
-              <p><strong>📱 Call Customer:</strong> <a href="tel:${phone}" style="color: #f97316;">${phone}</a></p>
+            <div style="background-color: #e7f3ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #333; margin-top: 0;">� IMMEDIATE ACTIONS</h3>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="mailto:${email}?subject=Re: ${subject}&body=Dear ${name},%0D%0A%0D%0AThank you for your inquiry about ${subject}. I'm happy to help you with your crackers requirements.%0D%0A%0D%0ABest regards,%0D%0AHanuma Crackers Team" 
+                   style="background: #f97316; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 5px 0;">
+                  � REPLY NOW
+                </a>
+                <a href="tel:${phone}" 
+                   style="background: #28a745; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 5px 0;">
+                  📞 CALL NOW
+                </a>
+              </div>
             </div>
 
-            <p style="color: #666; font-size: 14px;">⏰ <strong>Response Time:</strong> Please respond to this inquiry within 24 hours for best customer experience.</p>
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
+              <h4 style="color: #333; margin-top: 0;">📋 RESPONSE CHECKLIST</h4>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>☐ Read customer requirements carefully</li>
+                <li>☐ Check product availability and pricing</li>
+                <li>☐ Prepare detailed quote/response</li>
+                <li>☐ Contact customer within 24 hours</li>
+                <li>☐ Follow up if needed</li>
+              </ul>
+            </div>
+
+            <p style="color: #666; font-size: 12px; text-align: center; border-top: 1px solid #e0e0e0; padding-top: 15px; margin-top: 30px;">
+              🏪 <strong>Hanuma Crackers Business Dashboard</strong><br>
+              📧 Auto-generated admin notification | 📱 Immediate action required
+            </p>
           </div>
         `
       };
@@ -394,11 +420,18 @@ class EmailService {
         `
       };
 
-      // Send both emails with timeout protection
-      await Promise.allSettled([
-        this.sendEmail(adminMailOptions),
-        this.sendEmail(customerMailOptions)
-      ]);
+      // Send emails with timeout protection
+      // Don't send customer acknowledgment if customer email is same as admin email (testing scenario)
+      const emailsToSend = [this.sendEmail(adminMailOptions)];
+      
+      // Only send customer acknowledgment if customer email is different from admin email
+      if (email.toLowerCase() !== adminEmail.toLowerCase()) {
+        emailsToSend.push(this.sendEmail(customerMailOptions));
+      } else {
+        console.log('⚠️ Skipping customer acknowledgment - customer email same as admin email');
+      }
+
+      await Promise.allSettled(emailsToSend);
 
       logger.info('Contact form emails sent successfully', {
         customerEmail: email,

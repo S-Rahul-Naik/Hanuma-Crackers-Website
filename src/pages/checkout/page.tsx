@@ -166,9 +166,9 @@ export default function CheckoutPage() {
       return appliedCoupon.discount.shippingCost;
     }
     
-    // Otherwise, calculate based on current total
+    // Otherwise, calculate based on current total - Free shipping above ₹2150
     const finalAmount = getFinalTotal();
-    return finalAmount < 2000 ? 150 : 0;
+    return finalAmount < 2150 ? 150 : 0;
   };
 
   const getTotalWithShipping = () => {
@@ -860,7 +860,7 @@ export default function CheckoutPage() {
                 {!appliedCoupon ? (
                   <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <h4 className="text-sm font-semibold text-gray-900 mb-3">Have a Coupon Code?</h4>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       <input
                         type="text"
                         value={couponCode}
@@ -871,7 +871,7 @@ export default function CheckoutPage() {
                       <button
                         onClick={applyCoupon}
                         disabled={couponLoading || !couponCode.trim()}
-                        className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto px-6 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed min-w-[80px] flex items-center justify-center"
                       >
                         {couponLoading ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -885,11 +885,11 @@ export default function CheckoutPage() {
                     )}
                     <div className="mt-3 text-xs text-gray-600">
                       <p className="font-medium mb-1">Available coupons:</p>
-                      <div className="grid grid-cols-2 gap-1">
-                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE5 - 5% OFF</span>
-                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE10 - 10% OFF</span>
-                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE20 - 20% OFF</span>
-                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium">SAVE25 - 25% OFF</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium text-center">SAVE5 - 5% OFF</span>
+                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium text-center">SAVE10 - 10% OFF</span>
+                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium text-center">SAVE20 - 20% OFF</span>
+                        <span className="bg-white px-2 py-1 rounded text-orange-600 font-medium text-center">SAVE25 - 25% OFF</span>
                       </div>
                     </div>
                   </div>
@@ -939,8 +939,8 @@ export default function CheckoutPage() {
                     <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
                       <i className="ri-information-line mr-1"></i>
                       {appliedCoupon 
-                        ? `Add ₹${2000 - appliedCoupon.discount.discountedTotal} more for free shipping!`
-                        : `Add ₹${2000 - getFinalTotal()} more for free shipping!`
+                        ? `Add ₹${2150 - appliedCoupon.discount.discountedTotal} more for free shipping!`
+                        : `Add ₹${2150 - getFinalTotal()} more for free shipping!`
                       }
                     </div>
                   )}
