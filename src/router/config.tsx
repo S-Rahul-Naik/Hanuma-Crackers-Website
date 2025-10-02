@@ -43,7 +43,7 @@ const routes: RouteObject[] = [
   },
   {
     path: "/reset-password/:token",
-    element: <TestResetPassword />,
+    element: <ResetPassword />,
   },
   {
     path: "/admin",

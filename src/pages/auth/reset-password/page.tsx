@@ -4,6 +4,12 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 export default function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
+  
+  // Debug logging
+  console.log('ResetPassword component loaded');
+  console.log('Token from useParams:', token);
+  console.log('Current URL:', window.location.href);
+  console.log('Pathname:', window.location.pathname);
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
@@ -79,7 +85,13 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      {/* DEBUG SECTION - Remove in production */}
+      <div className="fixed top-0 left-0 w-full bg-green-500 text-white p-2 z-50">
+        <strong>🎯 DEBUG: Reset Password Component Loaded!</strong><br/>
+        Token: {token || 'NO TOKEN'} | URL: {window.location.pathname}
+      </div>
+      
+      <div className="max-w-md w-full space-y-8 mt-16">
         {/* Header */}
         <div className="text-center">
           <Link to="/" className="inline-block">
