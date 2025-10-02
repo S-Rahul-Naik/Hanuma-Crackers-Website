@@ -1,6 +1,15 @@
 const nodemailer = require('nodemailer');
 const logger = require('./logger');
 
+// Try to import SendGrid service (fallback if not available)
+let sendGridService = null;
+try {
+  sendGridService = require('./sendGridEmailService');
+  console.log('🌟 Using SendGrid email service (recommended for production)');
+} catch (error) {
+  console.log('📧 SendGrid not available, using SMTP fallback');
+}
+
 class EmailService {
   constructor() {
     this.transporter = null;
@@ -141,6 +150,25 @@ class EmailService {
 
   async sendEmail(mailOptions) {
     try {
+      // Try SendGrid first if available (recommended for production)
+      if (sendGridService && process.env.SENDGRID_API_KEY) {
+        console.log('🌟 Using SendGrid for email delivery');
+        
+        // For contact form emails, use specialized SendGrid method
+        if (mailOptions.isContactForm) {
+          return await sendGridService.sendContactFormEmails(
+            mailOptions.name,
+            mailOptions.email,
+            mailOptions.phone,
+            mailOptions.subject,
+            mailOptions.message
+          );
+        }
+        
+        // For other emails, fall back to SMTP
+        console.log('📧 Falling back to SMTP for non-contact emails');
+      }
+      
       // Reinitialize transporter if it's null (for cases where env vars loaded later)
       if (!this.transporter) {
         console.log('🔄 Reinitializing email transporter for sending...');
@@ -414,6 +442,14 @@ class EmailService {
 
   async sendContactFormEmails(name, email, phone, subject, message) {
     try {
+      // Try SendGrid first if available (recommended for production)
+      if (sendGridService && process.env.SENDGRID_API_KEY) {
+        console.log('🌟 Using SendGrid for contact form emails');
+        return await sendGridService.sendContactFormEmails(name, email, phone, subject, message);
+      }
+      
+      // Fallback to SMTP if SendGrid is not available
+      console.log('📧 Using SMTP fallback for contact form emails');
       // Use BUSINESS_EMAIL as admin email if ADMIN_EMAIL is not set
       const adminEmail = process.env.BUSINESS_EMAIL || process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
       

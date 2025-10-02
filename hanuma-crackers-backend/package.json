@@ -20,6 +20,7 @@
     "pm2:logs": "pm2 logs hanuma-api"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "axios": "^1.12.2",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.3",
