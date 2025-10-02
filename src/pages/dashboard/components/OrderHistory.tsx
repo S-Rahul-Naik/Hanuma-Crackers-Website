@@ -137,7 +137,7 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
     doc.setFontSize(headerFontSize);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 102, 0); // Orange color
-    doc.text('🎆 Hanuma Crackers', 20, yPosition);
+    doc.text('Hanuma Crackers', 20, yPosition);
     
     yPosition += 8;
     doc.setFontSize(smallFontSize);
