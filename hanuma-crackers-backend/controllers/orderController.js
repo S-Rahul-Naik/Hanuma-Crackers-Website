@@ -1,6 +1,8 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
+const emailService = require('../utils/emailService');
+const logger = require('../utils/logger');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -90,6 +92,29 @@ exports.createOrder = async (req, res, next) => {
     const populatedOrder = await Order.findById(order._id)
       .populate('user', 'name email phone')
       .populate('items.product', 'name price images');
+
+    // Send order confirmation emails asynchronously
+    setImmediate(async () => {
+      try {
+        // Send order confirmation to customer
+        await emailService.sendOrderConfirmation(populatedOrder, populatedOrder.user.email);
+        
+        // Send new order notification to admin
+        await emailService.sendNewOrderNotificationToAdmin(populatedOrder);
+        
+        logger.info('Order confirmation emails sent successfully', {
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+          customerEmail: populatedOrder.user.email
+        });
+      } catch (emailError) {
+        logger.error('Failed to send order confirmation emails:', {
+          error: emailError.message,
+          orderId: order._id,
+          orderNumber: order.orderNumber
+        });
+      }
+    });
 
     res.status(201).json({
       success: true,
