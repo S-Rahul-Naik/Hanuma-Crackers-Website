@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Session = require('../models/Session');
 const { createSession, clearSession } = require('../middleware/auth');
+const { sendTokenResponse } = require('../utils/sendToken');
 const emailService = require('../utils/emailService');
 const crypto = require('crypto');
 
@@ -321,7 +322,10 @@ exports.resetPassword = async (req, res, next) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    sendTokenResponse(user, 200, res);
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successful'
+    });
   } catch (error) {
     next(error);
   }

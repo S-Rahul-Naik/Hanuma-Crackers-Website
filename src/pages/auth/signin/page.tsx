@@ -10,6 +10,7 @@ export default function SignIn() {
     rememberMe: false
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { refresh } = useAuth();
 
@@ -97,15 +98,22 @@ export default function SignIn() {
                   <i className="ri-lock-line text-gray-400"></i>
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
                   placeholder="Enter your password"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-orange-500 transition-colors duration-200"
+                >
+                  <i className={`${showPassword ? 'ri-eye-line' : 'ri-eye-off-line'} text-gray-400 hover:text-orange-500`}></i>
+                </button>
               </div>
             </div>
 
