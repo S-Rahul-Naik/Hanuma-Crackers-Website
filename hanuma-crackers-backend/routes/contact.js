@@ -175,7 +175,7 @@ router.post('/', contactFormLimit, validateContactForm, async (req, res) => {
     // Send emails asynchronously in the background (non-blocking)
     setImmediate(async () => {
       try {
-        await emailService.sendContactFormEmails(name, email, subject, message);
+        await emailService.sendContactFormEmails(name, email, phone, subject, message);
         console.log('✅ Contact form emails sent successfully (background)');
       } catch (emailError) {
         console.log('⚠️ Email service error:', emailError.message);

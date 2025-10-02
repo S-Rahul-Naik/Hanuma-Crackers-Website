@@ -82,7 +82,15 @@ export default function DashboardOverview({ user, onTabChange, wishlistCount: pr
       
       clearTimeout(timeoutId);
       
-      if (!res.ok) throw new Error('Failed to load dashboard');
+      if (!res.ok) {
+        if (res.status === 401) {
+          // Handle authentication failure
+          setError('Please log in to access your dashboard');
+          return;
+        }
+        throw new Error(`Failed to load dashboard (${res.status})`);
+      }
+      
       const json = await res.json();
       
       if (json && json.success !== false) {

@@ -239,7 +239,7 @@ class EmailService {
     return await this.sendEmail(mailOptions);
   }
 
-  async sendContactFormEmails(name, email, subject, message) {
+  async sendContactFormEmails(name, email, phone, subject, message) {
     try {
       // Use BUSINESS_EMAIL as admin email if ADMIN_EMAIL is not set
       const adminEmail = process.env.BUSINESS_EMAIL || process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
@@ -251,21 +251,28 @@ class EmailService {
         subject: `New Contact Form Submission: ${subject}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #f97316;">New Contact Form Submission</h2>
+            <h2 style="color: #f97316;">🔔 New Contact Form Submission</h2>
             
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3>Contact Details</h3>
-              <p><strong>Name:</strong> ${name}</p>
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Subject:</strong> ${subject}</p>
+              <h3 style="color: #333; margin-top: 0;">📋 Customer Details</h3>
+              <p><strong>👤 Full Name:</strong> ${name}</p>
+              <p><strong>📧 Email Address:</strong> <a href="mailto:${email}">${email}</a></p>
+              <p><strong>📱 Phone Number:</strong> <a href="tel:${phone}">${phone}</a></p>
+              <p><strong>📝 Subject:</strong> ${subject}</p>
             </div>
 
-            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3>Message</h3>
-              <p style="white-space: pre-wrap;">${message}</p>
+            <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f97316;">
+              <h3 style="color: #333; margin-top: 0;">💬 Customer Message</h3>
+              <p style="white-space: pre-wrap; line-height: 1.6; background: white; padding: 15px; border-radius: 4px; border: 1px solid #e0e0e0;">${message}</p>
             </div>
 
-            <p>Please respond to this inquiry promptly.</p>
+            <div style="background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #333; margin-top: 0;">📞 Quick Actions</h3>
+              <p><strong>📧 Reply by Email:</strong> <a href="mailto:${email}?subject=Re: ${subject}" style="color: #f97316;">Click to Reply</a></p>
+              <p><strong>📱 Call Customer:</strong> <a href="tel:${phone}" style="color: #f97316;">${phone}</a></p>
+            </div>
+
+            <p style="color: #666; font-size: 14px;">⏰ <strong>Response Time:</strong> Please respond to this inquiry within 24 hours for best customer experience.</p>
           </div>
         `
       };
