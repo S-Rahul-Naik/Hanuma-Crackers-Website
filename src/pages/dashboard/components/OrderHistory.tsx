@@ -123,78 +123,194 @@ export default function OrderHistory({ user }: OrderHistoryProps) {
   };
 
   const downloadInvoice = (order: Order) => {
-    const pdf = new jsPDF();
+    const doc = new jsPDF();
     
-    // Header
-    pdf.setFontSize(20);
-    pdf.setTextColor(255, 102, 0);
-    pdf.text('HANUMA CRACKERS', 20, 30);
+    // Set font sizes and styles
+    const headerFontSize = 20;
+    const subHeaderFontSize = 16;
+    const bodyFontSize = 12;
+    const smallFontSize = 10;
     
-    pdf.setFontSize(12);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text('Premium Quality Crackers & Fireworks', 20, 40);
-    pdf.text('GST: 29ABCDE1234F1Z5', 20, 50);
-    pdf.text('Phone: +91 9876543210', 20, 60);
+    let yPosition = 20;
     
-    // Invoice details
-    pdf.setFontSize(16);
-    pdf.text('INVOICE', 150, 30);
+    // Header with company branding
+    doc.setFontSize(headerFontSize);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 102, 0); // Orange color
+    doc.text('🎆 Hanuma Crackers', 20, yPosition);
     
-    pdf.setFontSize(10);
-    pdf.text(`Invoice No: INV-${order.orderNumber}`, 150, 45);
-    pdf.text(`Order No: ${order.orderNumber}`, 150, 55);
-    pdf.text(`Date: ${formatDate(order.createdAt)}`, 150, 65);
-    pdf.text(`Status: ${order.status.toUpperCase()}`, 150, 75);
+    yPosition += 8;
+    doc.setFontSize(smallFontSize);
+    doc.setTextColor(100, 100, 100); // Gray color
+    doc.text('Premium Quality Fireworks', 20, yPosition);
     
-    // Customer details
-    pdf.setFontSize(12);
-    pdf.text('Bill To:', 20, 90);
+    yPosition += 15;
+    doc.setFontSize(subHeaderFontSize);
+    doc.setTextColor(0, 0, 0); // Black color
+    doc.setFont('helvetica', 'bold');
+    doc.text('CUSTOMER INVOICE', 20, yPosition);
+    
+    // Add horizontal line
+    yPosition += 5;
+    doc.setLineWidth(0.5);
+    doc.line(20, yPosition, 190, yPosition);
+    
+    yPosition += 15;
+    
+    // Order Information Section with background
+    doc.setFillColor(245, 245, 245);
+    doc.rect(15, yPosition - 5, 85, 55, 'F');
+    
+    doc.setFontSize(bodyFontSize);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Order Information', 20, yPosition);
+    yPosition += 8;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(smallFontSize);
+    doc.text(`Order Number: ${order.orderNumber}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Date: ${formatDate(order.createdAt)}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Total Items: ${order.items.length}`, 20, yPosition);
+    yPosition += 6;
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total Amount: ₹${order.totalPrice.toLocaleString()}`, 20, yPosition);
+    yPosition += 6;
+    doc.setFont('helvetica', 'normal');
+    
+    // Status badges with colors
+    const statusColor: [number, number, number] = order.status.toLowerCase() === 'delivered' ? [34, 197, 94] : 
+                       order.status.toLowerCase() === 'processing' ? [59, 130, 246] : [156, 163, 175];
+    doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+    doc.text(`Status: ${order.status.toUpperCase()}`, 20, yPosition);
+    yPosition += 6;
+    
+    const paymentColor: [number, number, number] = order.paymentStatus.toLowerCase() === 'paid' ? [34, 197, 94] : [239, 68, 68];
+    doc.setTextColor(paymentColor[0], paymentColor[1], paymentColor[2]);
+    doc.text(`Payment: ${order.paymentStatus.toUpperCase()}`, 20, yPosition);
+    
+    // Reset color
+    doc.setTextColor(0, 0, 0);
+    
+    // Customer Information Section with background
+    yPosition = 40; // Reset to top for customer info
+    doc.setFillColor(240, 253, 244);
+    doc.rect(110, yPosition - 5, 75, 55, 'F');
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(bodyFontSize);
+    doc.text('Customer Information', 115, yPosition);
+    yPosition += 8;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(smallFontSize);
+    doc.text(`Name: ${user?.name || 'Customer'}`, 115, yPosition);
+    yPosition += 6;
+    doc.text(`Email: ${user?.email || 'N/A'}`, 115, yPosition);
+    yPosition += 6;
+    doc.text(`Phone: ${user?.phone || order.shippingAddress?.phone || 'N/A'}`, 115, yPosition);
+    
+    // Shipping Address (if available)
     if (order.shippingAddress) {
-      pdf.setFontSize(10);
-      pdf.text(order.shippingAddress.name, 20, 100);
-      pdf.text(order.shippingAddress.phone, 20, 110);
-      pdf.text(order.shippingAddress.street, 20, 120);
-      pdf.text(`${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.pincode}`, 20, 130);
+      yPosition += 10;
+      doc.setFont('helvetica', 'bold');
+      doc.text('Shipping Address:', 115, yPosition);
+      yPosition += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const address = `${order.shippingAddress.street}, ${order.shippingAddress.city}`;
+      const addressLine2 = `${order.shippingAddress.state} ${order.shippingAddress.pincode}`;
+      doc.text(address.length > 25 ? address.substring(0, 25) + '...' : address, 115, yPosition);
+      yPosition += 4;
+      doc.text(addressLine2, 115, yPosition);
+      doc.setFontSize(smallFontSize);
     }
     
-    // Items table
-    let yPos = 150;
-    pdf.setFontSize(12);
-    pdf.text('Items:', 20, yPos);
+    yPosition = 110; // Move to items section
     
-    yPos += 10;
-    pdf.setFontSize(10);
-    pdf.text('Item', 20, yPos);
-    pdf.text('Qty', 120, yPos);
-    pdf.text('Price', 140, yPos);
-    pdf.text('Total', 170, yPos);
+    // Order Items Section
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(bodyFontSize);
+    doc.text('Order Items', 20, yPosition);
+    yPosition += 10;
     
-    yPos += 5;
-    pdf.line(20, yPos, 190, yPos);
+    // Table headers with orange background
+    doc.setFillColor(255, 102, 0); // Orange background
+    doc.rect(15, yPosition - 3, 175, 8, 'F');
     
-    order.items.forEach((item) => {
-      yPos += 10;
-      pdf.text(item.name, 20, yPos);
-      pdf.text(item.quantity.toString(), 120, yPos);
-      pdf.text(`₹${item.price}`, 140, yPos);
-      pdf.text(`₹${(item.price * item.quantity).toLocaleString()}`, 170, yPos);
+    doc.setFontSize(smallFontSize);
+    doc.setTextColor(255, 255, 255); // White text
+    doc.setFont('helvetica', 'bold');
+    doc.text('Item Name', 20, yPosition);
+    doc.text('Qty', 110, yPosition);
+    doc.text('Price', 130, yPosition);
+    doc.text('Total', 160, yPosition);
+    yPosition += 10;
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+    
+    // Table rows with alternating background
+    doc.setFont('helvetica', 'normal');
+    order.items.forEach((item, index) => {
+      if (yPosition > 270) { // Check if we need a new page
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      // Alternating row colors
+      if (index % 2 === 0) {
+        doc.setFillColor(249, 250, 251);
+        doc.rect(15, yPosition - 3, 175, 8, 'F');
+      }
+      
+      const itemName = item.name.length > 30 ? item.name.substring(0, 30) + '...' : item.name;
+      doc.text(itemName, 20, yPosition);
+      doc.text(item.quantity.toString(), 110, yPosition);
+      doc.text(`₹${item.price.toLocaleString()}`, 130, yPosition);
+      doc.text(`₹${(item.quantity * item.price).toLocaleString()}`, 160, yPosition);
+      yPosition += 8;
     });
     
-    yPos += 10;
-    pdf.line(20, yPos, 190, yPos);
+    // Add tracking number if available
+    if (order.trackingNumber) {
+      yPosition += 5;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(smallFontSize);
+      doc.setTextColor(59, 130, 246); // Blue color
+      doc.text(`Tracking Number: ${order.trackingNumber}`, 20, yPosition);
+      doc.setTextColor(0, 0, 0);
+      yPosition += 5;
+    }
     
-    // Total
-    yPos += 10;
-    pdf.setFontSize(12);
-    pdf.text(`Total Amount: ₹${order.totalPrice.toLocaleString()}`, 120, yPos);
+    // Add total section with emphasis
+    yPosition += 10;
+    doc.setLineWidth(1);
+    doc.line(130, yPosition, 190, yPosition);
+    yPosition += 8;
+    
+    doc.setFillColor(255, 102, 0);
+    doc.rect(125, yPosition - 4, 65, 10, 'F');
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(bodyFontSize);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`TOTAL: ₹${order.totalPrice.toLocaleString()}`, 130, yPosition);
     
     // Footer
-    yPos += 30;
-    pdf.setFontSize(8);
-    pdf.text('Thank you for shopping with Hanuma Crackers!', 20, yPos);
-    pdf.text('For support: support@hanumacrackers.com', 20, yPos + 10);
+    yPosition = 275;
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, yPosition);
+    yPosition += 4;
+    doc.text('Thank you for choosing Hanuma Crackers!', 20, yPosition);
+    yPosition += 4;
+    doc.text('For queries: hanumacracker@gmail.com | +918688556898', 20, yPosition);
     
-    pdf.save(`invoice-${order.orderNumber}.pdf`);
+    // Save the PDF
+    doc.save(`Hanuma-Crackers-Invoice-${order.orderNumber}.pdf`);
   };
 
   const trackOrder = (order: Order) => {

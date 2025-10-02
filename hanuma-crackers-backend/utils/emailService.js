@@ -7,6 +7,16 @@ class EmailService {
   }
 
   createTransporter() {
+    // Debug environment variables
+    console.log('Email service initialization:');
+    console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'Set' : 'Not set');
+    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set (length: ' + process.env.EMAIL_PASS.length + ')' : 'Not set');
+    
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('⚠️ Email credentials not properly configured');
+      return null;
+    }
+
     // Use Gmail SMTP (you can change this based on your email provider)
     const config = {
       service: 'gmail',
@@ -31,16 +41,25 @@ class EmailService {
       delete config.service;
     }
 
+    console.log('Creating email transporter with Gmail service');
     return nodemailer.createTransport(config);
   }
 
   async verifyConnection() {
     try {
+      if (!this.transporter) {
+        throw new Error('Email transporter not initialized');
+      }
       await this.transporter.verify();
       logger.info('Email service connection verified successfully');
       return true;
     } catch (error) {
       logger.error('Email service verification failed:', error);
+      console.error('Email verification error details:', {
+        message: error.message,
+        code: error.code,
+        command: error.command
+      });
       return false;
     }
   }
@@ -222,10 +241,13 @@ class EmailService {
 
   async sendContactFormEmails(name, email, subject, message) {
     try {
+      // Use BUSINESS_EMAIL as admin email if ADMIN_EMAIL is not set
+      const adminEmail = process.env.BUSINESS_EMAIL || process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+      
       // Admin notification email
       const adminMailOptions = {
         from: process.env.EMAIL_USER,
-        to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+        to: adminEmail,
         subject: `New Contact Form Submission: ${subject}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
