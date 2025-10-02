@@ -6,6 +6,7 @@ import SignIn from "../pages/auth/signin/page";
 import SignUp from "../pages/auth/signup/page";
 import ForgotPassword from "../pages/auth/forgot-password/page";
 import ResetPassword from "../pages/auth/reset-password/page";
+import TestResetPassword from "../pages/auth/reset-password/TestResetPassword";
 import AdminDashboard from "../pages/admin/page";
 import UserDashboard from "../pages/dashboard/page";
 import CheckoutPage from "../pages/checkout/page";
@@ -42,7 +43,7 @@ const routes: RouteObject[] = [
   },
   {
     path: "/reset-password/:token",
-    element: <ResetPassword />,
+    element: <TestResetPassword />,
   },
   {
     path: "/admin",
