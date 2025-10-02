@@ -34,17 +34,20 @@ class EmailService {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS
         },
-        connectionTimeout: 60000, // 60 seconds
-        greetingTimeout: 30000,   // 30 seconds
-        socketTimeout: 60000,     // 60 seconds
+        connectionTimeout: 120000, // 2 minutes
+        greetingTimeout: 60000,   // 1 minute
+        socketTimeout: 120000,    // 2 minutes
         tls: {
           rejectUnauthorized: false,
-          ciphers: 'SSLv3'
+          ciphers: 'SSLv3',
+          servername: 'smtp.gmail.com'
         },
-        // Additional production settings
+        // Enhanced production settings for Render
         pool: true,
-        maxConnections: 10,
-        maxMessages: 1000
+        maxConnections: 5,
+        maxMessages: 100,
+        debug: process.env.NODE_ENV === 'development',
+        logger: process.env.NODE_ENV === 'development'
         // Rate limiting PERMANENTLY DISABLED - Unlimited email sending
       };
 
@@ -69,17 +72,20 @@ class EmailService {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS
         },
-        connectionTimeout: 60000, // 60 seconds
-        greetingTimeout: 30000,   // 30 seconds
-        socketTimeout: 60000,     // 60 seconds
+        connectionTimeout: 120000, // 2 minutes
+        greetingTimeout: 60000,   // 1 minute
+        socketTimeout: 120000,    // 2 minutes
         tls: {
           rejectUnauthorized: false,
-          ciphers: 'SSLv3'
+          ciphers: 'SSLv3',
+          servername: 'smtp.gmail.com'
         },
-        // Additional production settings
+        // Enhanced production settings for Render
         pool: true,
-        maxConnections: 10,
-        maxMessages: 1000
+        maxConnections: 5,
+        maxMessages: 100,
+        debug: process.env.NODE_ENV === 'development',
+        logger: process.env.NODE_ENV === 'development'
         // Rate limiting PERMANENTLY DISABLED - Unlimited email sending
       };
 
