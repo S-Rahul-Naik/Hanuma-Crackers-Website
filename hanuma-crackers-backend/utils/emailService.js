@@ -48,10 +48,11 @@ class EmailService {
       
       // For password reset emails
       if (mailOptions.isPasswordReset) {
-        return await sendGridService.sendPasswordResetEmail(
-          mailOptions.to,
-          mailOptions.resetToken
-        );
+        return await sendGridService.sendPasswordResetEmail({
+          email: mailOptions.to,
+          name: mailOptions.name || 'Customer',
+          resetToken: mailOptions.resetToken
+        });
       }
       
       // For other generic emails, throw error since SMTP is removed
@@ -109,7 +110,7 @@ class EmailService {
     }
   }
 
-  async sendPasswordResetEmail(userEmail, resetToken) {
+  async sendPasswordResetEmail(resetData) {
     try {
       // SendGrid ONLY - SMTP permanently removed
       if (!sendGridService || !process.env.SENDGRID_API_KEY) {
@@ -117,7 +118,7 @@ class EmailService {
       }
 
       console.log('🌟 Using SendGrid for password reset email (SMTP permanently disabled)');
-      return await sendGridService.sendPasswordResetEmail(userEmail, resetToken);
+      return await sendGridService.sendPasswordResetEmail(resetData);
       
     } catch (error) {
       console.error('❌ SendGrid password reset email failed:', error);

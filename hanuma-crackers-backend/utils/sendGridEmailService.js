@@ -274,18 +274,19 @@ const sendOrderConfirmation = async (orderData, userEmail) => {
     }
 };
 
-const sendPasswordResetEmail = async (userEmail, resetToken) => {
+const sendPasswordResetEmail = async (resetData) => {
     try {
         const emailFrom = process.env.EMAIL_FROM || process.env.BUSINESS_EMAIL || 'hanumacrackers@gmail.com';
-        const resetUrl = `${process.env.FRONTEND_URL || 'https://hanuma-crackers.netlify.app'}/reset-password?token=${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL || 'https://hanuma-crackers.netlify.app'}/reset-password/${resetData.resetToken}`;
         
         const msg = {
-            to: userEmail,
+            to: resetData.email,
             from: emailFrom,
             subject: 'Password Reset Request - Hanuma Crackers 🎆',
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
                     <h2 style="color: #FF6B35; text-align: center;">🎆 Password Reset Request</h2>
+                    <p>Hello ${resetData.name || 'Customer'},</p>
                     <p>You requested a password reset for your Hanuma Crackers account.</p>
                     
                     <div style="text-align: center; margin: 30px 0;">

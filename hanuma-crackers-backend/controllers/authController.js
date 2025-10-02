@@ -267,7 +267,6 @@ exports.forgotPassword = async (req, res, next) => {
       await emailService.sendPasswordResetEmail({
         email: user.email,
         name: user.name,
-        resetUrl: resetUrl,
         resetToken: resetToken
       });
 
