@@ -1,23 +1,23 @@
 
+import { Link } from 'react-router-dom';
+
 const companyLinks = [
-  { name: 'About Us', href: '#' },
-  { name: 'Our Story', href: '#' },
-  { name: 'Careers', href: '#' },
-  { name: 'Press', href: '#' }
+  { name: 'About Us', href: '/about-us' },
+  { name: 'Our Story', href: '/our-story' }
 ];
 
 const supportLinks = [
-  { name: 'Shipping Policy', href: '#' },
-  { name: 'Returns & Refunds', href: '#' },
-  { name: 'FAQs', href: '#' },
-  { name: 'Contact Us', href: '#' }
+  { name: 'Shipping Policy', href: '/shipping-policy' },
+  { name: 'Returns & Refunds', href: '/returns-refunds' },
+  { name: 'FAQs', href: '/faqs' },
+  { name: 'Contact Us', href: '/contact-us' }
 ];
 
 const legalLinks = [
-  { name: 'Privacy Policy', href: '#' },
-  { name: 'Terms of Service', href: '#' },
-  { name: 'Cookie Policy', href: '#' },
-  { name: 'Disclaimer', href: '#' }
+  { name: 'Privacy Policy', href: '/privacy-policy' },
+  { name: 'Terms of Service', href: '/terms-of-service' },
+  { name: 'Cookie Policy', href: '/cookie-policy' },
+  { name: 'Disclaimer', href: '/disclaimer' }
 ];
 
 const socialLinks = [
@@ -73,12 +73,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {companyLinks.map((link) => (
                 <li key={link.name}>
-                  <a 
-                    href={link.href} 
+                  <Link 
+                    to={link.href} 
                     className="text-purple-200 hover:text-white transition-colors duration-300 hover:translate-x-1 inline-block"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -89,12 +89,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {supportLinks.map((link) => (
                 <li key={link.name}>
-                  <a 
-                    href={link.href} 
+                  <Link 
+                    to={link.href} 
                     className="text-purple-200 hover:text-white transition-colors duration-300 hover:translate-x-1 inline-block"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -105,12 +105,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <li key={link.name}>
-                  <a 
-                    href={link.href} 
+                  <Link 
+                    to={link.href} 
                     className="text-purple-200 hover:text-white transition-colors duration-300 hover:translate-x-1 inline-block"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
