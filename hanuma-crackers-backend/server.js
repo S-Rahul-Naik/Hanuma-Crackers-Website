@@ -34,6 +34,7 @@ const admin = require('./routes/admin');
 const coupon = require('./routes/coupon');
 const contact = require('./routes/contact');
 const wishlist = require('./routes/wishlist');
+const testRoutes = require('./routes/test');
 
 // Middleware
 const { errorHandler, notFound } = require('./middleware/error');
@@ -125,6 +126,7 @@ app.use('/api/admin', admin);
 app.use('/api/coupons', coupon);
 app.use('/api/contact', contact);
 app.use('/api/wishlist', wishlist);
+app.use('/api/test', testRoutes); // Test routes for email functionality
 
 // Root route
 app.get('/', (req, res) => {
