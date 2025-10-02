@@ -22,32 +22,89 @@ class EmailService {
   }
 
   createTransporter() {
-    // Use Gmail SMTP (you can change this based on your email provider)
-    const config = {
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER, // Your Gmail address
-        pass: process.env.EMAIL_PASS  // Your Gmail app password
-      },
-      // Add timeout configurations
-      connectionTimeout: 10000, // 10 seconds
-      greetingTimeout: 5000, // 5 seconds
-      socketTimeout: 10000, // 10 seconds
-      tls: {
-        rejectUnauthorized: false
-      }
-    };
+    // Check if SMTP environment variables are provided (Render setup)
+    if (process.env.SMTP_HOST && process.env.SMTP_PORT) {
+      console.log('🌐 Using dedicated SMTP configuration from environment');
+      
+      const config = {
+        host: process.env.SMTP_HOST, // smtp.gmail.com
+        port: parseInt(process.env.SMTP_PORT), // 587
+        secure: process.env.SMTP_SECURE === 'true', // false for 587, true for 465
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        },
+        connectionTimeout: 60000, // 60 seconds
+        greetingTimeout: 30000,   // 30 seconds
+        socketTimeout: 60000,     // 60 seconds
+        tls: {
+          rejectUnauthorized: false,
+          ciphers: 'SSLv3'
+        },
+        // Additional production settings
+        pool: true,
+        maxConnections: 10,
+        maxMessages: 1000
+        // Rate limiting PERMANENTLY DISABLED - Unlimited email sending
+      };
 
-    // For other email providers, you can use SMTP settings
-    if (process.env.SMTP_HOST) {
-      config.host = process.env.SMTP_HOST;
-      config.port = process.env.SMTP_PORT || 587;
-      config.secure = process.env.SMTP_SECURE === 'true';
-      delete config.service;
+      console.log('📧 SMTP Config from ENV:', {
+        host: config.host,
+        port: config.port,
+        secure: config.secure,
+        user: config.auth.user
+      });
+      
+      return nodemailer.createTransport(config);
     }
+    // Production environment - use SMTP settings for better reliability
+    else if (process.env.NODE_ENV === 'production') {
+      console.log('🌐 Production mode: Using default SMTP configuration');
+      
+      const config = {
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // Use STARTTLS
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        },
+        connectionTimeout: 60000, // 60 seconds
+        greetingTimeout: 30000,   // 30 seconds
+        socketTimeout: 60000,     // 60 seconds
+        tls: {
+          rejectUnauthorized: false,
+          ciphers: 'SSLv3'
+        },
+        // Additional production settings
+        pool: true,
+        maxConnections: 10,
+        maxMessages: 1000
+        // Rate limiting PERMANENTLY DISABLED - Unlimited email sending
+      };
 
-    console.log('Creating email transporter with Gmail service');
-    return nodemailer.createTransport(config);
+      console.log('📧 SMTP Config: host=' + config.host + ', port=' + config.port + ', secure=' + config.secure);
+      return nodemailer.createTransport(config);
+    } else {
+      // Development environment - use Gmail service
+      console.log('🔧 Development mode: Using Gmail service');
+      
+      const config = {
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 5000,
+        socketTimeout: 10000,
+        tls: {
+          rejectUnauthorized: false
+        }
+      };
+
+      return nodemailer.createTransport(config);
+    }
   }
 
   async verifyConnection() {
@@ -88,18 +145,54 @@ class EmailService {
         throw new Error('Email transporter not initialized - check EMAIL_USER and EMAIL_PASS environment variables');
       }
       
+      // Add production-specific logging
+      console.log('📧 Attempting to send email:', {
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        from: mailOptions.from,
+        environment: process.env.NODE_ENV
+      });
+      
       const info = await this.transporter.sendMail(mailOptions);
+      
+      // Enhanced success logging for production debugging
+      console.log('✅ Email sent successfully:', {
+        messageId: info.messageId,
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        accepted: info.accepted,
+        rejected: info.rejected,
+        response: info.response
+      });
+      
       logger.info('Email sent successfully', {
         messageId: info.messageId,
         to: mailOptions.to,
-        subject: mailOptions.subject
+        subject: mailOptions.subject,
+        accepted: info.accepted,
+        rejected: info.rejected
       });
+      
       return {
         success: true,
         messageId: info.messageId,
-        info
+        info,
+        accepted: info.accepted,
+        rejected: info.rejected
       };
     } catch (error) {
+      // Enhanced error logging for production debugging
+      console.error('❌ Email sending failed:', {
+        error: error.message,
+        code: error.code,
+        command: error.command,
+        response: error.response,
+        responseCode: error.responseCode,
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        environment: process.env.NODE_ENV
+      });
+      
       logger.error('Failed to send email:', error);
       throw error;
     }

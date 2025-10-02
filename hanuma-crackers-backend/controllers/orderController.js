@@ -93,28 +93,59 @@ exports.createOrder = async (req, res, next) => {
       .populate('user', 'name email phone')
       .populate('items.product', 'name price images');
 
-    // Send order confirmation emails asynchronously
-    setImmediate(async () => {
+    // Send order confirmation emails with enhanced error handling
+    const sendOrderEmails = async () => {
       try {
+        console.log('📧 Sending order confirmation emails for order:', order.orderNumber);
+        
         // Send order confirmation to customer
-        await emailService.sendOrderConfirmation(populatedOrder, populatedOrder.user.email);
+        console.log('📧 Sending customer confirmation to:', populatedOrder.user.email);
+        const customerEmailResult = await emailService.sendOrderConfirmation(populatedOrder, populatedOrder.user.email);
+        
+        if (customerEmailResult.success) {
+          console.log('✅ Customer email sent successfully:', customerEmailResult.messageId);
+        } else {
+          console.error('❌ Customer email failed:', customerEmailResult.error);
+        }
         
         // Send new order notification to admin
-        await emailService.sendNewOrderNotificationToAdmin(populatedOrder);
+        const adminEmail = process.env.BUSINESS_EMAIL || process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+        console.log('📧 Sending admin notification to:', adminEmail);
+        const adminEmailResult = await emailService.sendNewOrderNotificationToAdmin(populatedOrder);
         
-        logger.info('Order confirmation emails sent successfully', {
+        if (adminEmailResult.success) {
+          console.log('✅ Admin email sent successfully:', adminEmailResult.messageId);
+        } else {
+          console.error('❌ Admin email failed:', adminEmailResult.error);
+        }
+        
+        logger.info('Order confirmation emails processed', {
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+          customerEmail: populatedOrder.user.email,
+          customerEmailSent: customerEmailResult.success,
+          adminEmailSent: adminEmailResult.success
+        });
+        
+      } catch (emailError) {
+        console.error('❌ Email sending error:', {
+          error: emailError.message,
+          stack: emailError.stack,
+          orderId: order._id,
+          orderNumber: order.orderNumber
+        });
+        
+        logger.error('Failed to send order confirmation emails:', {
+          error: emailError.message,
           orderId: order._id,
           orderNumber: order.orderNumber,
           customerEmail: populatedOrder.user.email
         });
-      } catch (emailError) {
-        logger.error('Failed to send order confirmation emails:', {
-          error: emailError.message,
-          orderId: order._id,
-          orderNumber: order.orderNumber
-        });
       }
-    });
+    };
+
+    // Execute email sending without blocking the response
+    sendOrderEmails();
 
     res.status(201).json({
       success: true,

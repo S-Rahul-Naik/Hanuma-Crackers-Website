@@ -1,22 +1,12 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const rateLimit = require('express-rate-limit');
 const emailService = require('../utils/emailService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
 
-// Rate limiting for contact form - 5 submissions per hour per IP
-const contactFormLimit = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5,
-  message: {
-    error: 'Too many contact form submissions. Please try again in an hour.',
-    code: 'RATE_LIMIT_EXCEEDED'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// RATE LIMITING PERMANENTLY DISABLED - Unlimited contact form submissions allowed
+console.log('⚠️  Contact form rate limiting is PERMANENTLY DISABLED');
 
 // Validation middleware
 const validateContactForm = [
@@ -131,7 +121,7 @@ const validateContactForm = [
  *       500:
  *         description: Server error
  */
-router.post('/', contactFormLimit, validateContactForm, async (req, res) => {
+router.post('/', validateContactForm, async (req, res) => {
   try {
     // Check validation results
     const errors = validationResult(req);

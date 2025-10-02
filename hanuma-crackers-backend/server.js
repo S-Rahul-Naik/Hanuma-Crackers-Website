@@ -4,7 +4,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
-const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
@@ -64,33 +63,8 @@ app.use(hpp({
   whitelist: ['sort', 'fields', 'page', 'limit', 'category', 'price']
 }));
 
-// Rate limiting for production security - more lenient for auth
-const limiter = rateLimit({
-  windowMs: process.env.RATE_LIMIT_WINDOW || 15 * 60 * 1000, // 15 minutes
-  max: process.env.RATE_LIMIT_MAX || 3000, // Increased from 100 to 300 requests per windowMs
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  // Skip rate limiting for development and auth endpoints
-  skip: (req) => {
-    return process.env.NODE_ENV === 'development' || 
-           req.path.startsWith('/api/auth') ||
-           req.path.startsWith('/api/admin');
-  }
-});
-
-// Auth rate limiter PERMANENTLY DISABLED for unlimited login attempts
-
-// Apply rate limiting
-if (process.env.NODE_ENV === 'production') {
-  app.use(limiter);
-  console.log('✅ Rate limiting is ENABLED for production');
-} else {
-  console.log('⚠️  Rate limiting is DISABLED for development');
-}
+// RATE LIMITING PERMANENTLY DISABLED - NO LIMITS ON REQUESTS
+console.log('⚠️  Rate limiting is PERMANENTLY DISABLED - Unlimited requests allowed');
 
 // CORS with production configuration
 const corsOriginsEnv = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map(o => o.trim()) : [];
