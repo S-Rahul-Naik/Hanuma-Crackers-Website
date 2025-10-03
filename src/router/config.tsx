@@ -99,7 +99,15 @@ const routes: RouteObject[] = [
     element: <PrivacyPolicy />,
   },
   {
+    path: "/privacy",
+    element: <PrivacyPolicy />,
+  },
+  {
     path: "/terms-of-service",
+    element: <TermsOfService />,
+  },
+  {
+    path: "/terms",
     element: <TermsOfService />,
   },
   {

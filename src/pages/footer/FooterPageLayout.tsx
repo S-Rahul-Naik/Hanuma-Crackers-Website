@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 
 interface FooterPageLayoutProps {
   title: string;
@@ -7,6 +8,15 @@ interface FooterPageLayoutProps {
 }
 
 export default function FooterPageLayout({ title, children, lastUpdated }: FooterPageLayoutProps) {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
       {/* Header */}
